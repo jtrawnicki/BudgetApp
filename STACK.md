@@ -40,6 +40,8 @@ BudgetApp/
 │   └── budget.test.js    # testy obliczeń i walidacji
 ├── fonts/                # czcionka Inter (dołączona do projektu, żeby działała offline)
 ├── icons/                # ikony aplikacji
+├── AGENTS.md            # zasady pracy (dla agentów AI i ludzi)
+├── CLAUDE.md            # wczytuje AGENTS.md w Claude Code
 ├── SPEC.md
 └── STACK.md
 ```
@@ -75,22 +77,22 @@ Dane są zapisane w `localStorage` pod kluczem `budgetapp-data`. Ten sam format 
 
 ## 4. Plan pracy na weekend
 
-Każdy krok to mała, zamknięta całość: AI generuje kod, właściciel projektu go przegląda i testuje, a na koniec kroku robimy commit.
+Każdy krok to mała, zamknięta całość: AI generuje kod, właściciel projektu go przegląda i testuje, a po jego akceptacji robimy commit i wysyłamy zmiany na GitHub (zob. AGENTS.md).
 
 **Sobota**
-1. Szkielet projektu, repozytorium na GitHubie, pusta strona działająca lokalnie.
-2. `budget.js`: obliczenia i walidacja oraz testy.
-3. `storage.js`: zapis i odczyt danych.
-4. Wygląd: kolory, czcionka, karty, dolne zakładki.
-5. Ekran Plan: podsumowanie, pasek podziału, suwaki.
-6. Ekrany Przychody i Wydatki: dodawanie, edycja, usuwanie, walidacja.
+- [ ] Szkielet projektu, repozytorium na GitHubie, pusta strona działająca lokalnie.
+- [ ] `budget.js`: obliczenia i walidacja oraz testy.
+- [ ] `storage.js`: zapis i odczyt danych.
+- [ ] Wygląd: kolory, czcionka, karty, dolne zakładki.
+- [ ] Ekran Plan: podsumowanie, pasek podziału, suwaki.
+- [ ] Ekrany Przychody i Wydatki: dodawanie, edycja, usuwanie, walidacja.
 
 **Niedziela**
-1. Przełączanie miesięcy, tworzenie planu (kopiuj albo od zera), miesiące zamknięte i „Brak planu”.
-2. Ekran Więcej: eksport, import, usunięcie planu.
-3. PWA: manifest, ikony, działanie offline.
-4. Publikacja na GitHub Pages i testy na telefonie.
-5. Poprawki i sprawdzenie kryteriów ukończenia (SPEC.md, sekcja 6 oraz sekcja 5 poniżej).
+- [ ] Przełączanie miesięcy, tworzenie planu (kopiuj albo od zera), miesiące zamknięte i „Brak planu”.
+- [ ] Ekran Więcej: eksport, import, usunięcie planu.
+- [ ] PWA: manifest, ikony, działanie offline.
+- [ ] Publikacja na GitHub Pages i testy na telefonie.
+- [ ] Poprawki i sprawdzenie kryteriów ukończenia (SPEC.md, sekcja 6 oraz sekcja 5 poniżej).
 
 ---
 
