@@ -97,13 +97,15 @@ Status wynika z daty ustawionej w urządzeniu.
 
 - Miesiąc zamyka się automatycznie 1. dnia kolejnego miesiąca.
 - Niewydane pieniądze przepadają i nie przechodzą dalej.
-- Strzałką w lewo można się cofać do najstarszego miesiąca, który ma plan. Jeśli nie ma żadnego planu, strzałka jest nieaktywna.
+- Strzałką w lewo można się cofać do najstarszego miesiąca, który ma plan. Jeśli żaden wcześniejszy miesiąc nie ma planu, strzałka jest nieaktywna na bieżącym miesiącu.
+- Bieżący miesiąc jest zawsze dostępny, także gdy nie ma żadnego planu albo jedyny plan ma następny miesiąc.
 - Strzałka w prawo jest nieaktywna na następnym miesiącu.
 
 ### 3.3 Tworzenie planu
-- „Skopiuj z [miesiąc]” kopiuje **wszystko**: przychody, % i wydatki. Źródłem jest najnowszy wcześniejszy miesiąc, który ma plan.
+- „Skopiuj z: [miesiąc]” kopiuje **wszystko**: przychody, % i wydatki. Źródłem jest najnowszy wcześniejszy miesiąc, który ma plan.
 - Jeśli żaden wcześniejszy plan nie istnieje, dostępna jest tylko opcja „Zacznij od zera”. Plan od zera startuje z pustymi listami i 0%.
 - Kopiowanie następuje raz. Późniejsze zmiany w jednym miesiącu nie wpływają na inne.
+- Nazwy miesięcy w tekstach przycisków i kart nie są odmieniane, np. „Skopiuj z: Wrzesień 2026”, „Zaplanuj: Listopad 2026”.
 
 ### 3.4 Walidacja
 Każda zmiana, która złamałaby regułę, jest **odrzucana**. Pod polem pojawia się komunikat, a poprzednia wartość zostaje bez zmian. Reguły:
@@ -112,10 +114,13 @@ Każda zmiana, która złamałaby regułę, jest **odrzucana**. Pod polem pojawi
 3. Każda kwota jest większa od 0 i ma najwyżej 2 miejsca po przecinku.
 4. Każdy przychód i wydatek ma niepustą nazwę.
 
+Wyjątek: suwak % nie wraca do poprzedniej wartości, tylko zatrzymuje się na najwyższej dozwolonej wartości (zgodnej z regułami 1 i 2), a pod nim pojawia się komunikat.
+
 ### 3.5 Format i dokładność
 - Waluta to wyłącznie PLN, a interfejs jest po polsku.
 - Kwoty wyświetlają się z groszami, np. `1 234,56 zł`.
-- Obliczenia są dokładne co do grosza, bez błędów zaokrągleń. Oszczędności i inwestycje zaokrąglamy do pełnego grosza.
+- Kwotę można wpisać z przecinkiem albo z kropką, np. `12,50` lub `12.50`.
+- Obliczenia są dokładne co do grosza, bez błędów zaokrągleń. Oszczędności i inwestycje zaokrąglamy do pełnego grosza, połówki w górę (np. 12,5 gr → 13 gr).
 
 ---
 
@@ -124,7 +129,7 @@ Każda zmiana, która złamałaby regułę, jest **odrzucana**. Pod polem pojawi
 ### 4.1 Elementy wspólne
 - **Nagłówek:** strzałka w lewo, nazwa miesiąca (np. „Październik 2026”), strzałka w prawo. Wybrany miesiąc obowiązuje na wszystkich zakładkach.
 - **Dolny pasek zakładek:** Plan, Przychody, Wydatki, Więcej.
-- **Miesiąc bez planu:** na każdej zakładce widać kartę „Zaplanuj [miesiąc]” z przyciskami tworzenia planu. Dla zamkniętego miesiąca widać napis „Brak planu”.
+- **Miesiąc bez planu:** na każdej zakładce widać kartę „Zaplanuj: [miesiąc]” z przyciskami tworzenia planu. Dla zamkniętego miesiąca widać napis „Brak planu”.
 
 ### 4.2 Plan
 - Karta główna: „Zostało do zaplanowania”, duża kwota i pasek podziału (oszczędności, inwestycje, wydatki, zostało).
@@ -135,6 +140,7 @@ Każda zmiana, która złamałaby regułę, jest **odrzucana**. Pod polem pojawi
 Oba ekrany są zbudowane tak samo:
 - formularz na górze: pola „Nazwa” i „Kwota” oraz przycisk „Dodaj”,
 - lista pozycji: dotknięcie pozycji zamienia ją w pola do edycji, a ikona kosza usuwa pozycję od razu,
+- edycja: zmiana zapisuje się po naciśnięciu Enter albo po wyjściu z pola (np. dotknięciu innego miejsca ekranu); Escape anuluje edycję; niepoprawna wartość zostaje w polu z komunikatem do czasu poprawienia,
 - suma „Razem”,
 - miesiąc zamknięty: sama lista, bez formularza, edycji i koszy.
 
@@ -143,6 +149,7 @@ Oba ekrany są zbudowane tak samo:
 - **Importuj dane:** wczytuje plik, po potwierdzeniu, że obecne dane zostaną zastąpione. Niepoprawny plik daje komunikat błędu i niczego nie zmienia.
 - **Usuń plan miesiąca:** z potwierdzeniem, tylko dla bieżącego i następnego miesiąca.
 - Informacja: „Dane zapisane tylko na tym urządzeniu”.
+- Potwierdzenia wyświetlają się w oknie w stylu aplikacji, z przyciskiem opisującym skutek (np. „Zastąp dane”, „Usuń plan”) oraz przyciskiem „Anuluj”.
 
 ---
 

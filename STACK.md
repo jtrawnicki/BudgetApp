@@ -13,6 +13,7 @@
 | Interfejs | HTML + CSS | Podstawa każdej strony; właściciel projektu je zna |
 | Logika | JavaScript (moduły ES), bez frameworka i bez kompilacji | Nauka podstaw, zero konfiguracji |
 | Dane | `localStorage` + eksport/import pliku JSON | Bez backendu; dane zostają na urządzeniu |
+| Okna potwierdzeń | wbudowany element HTML `<dialog>` | Wygląd zgodny z aplikacją, bez bibliotek |
 | Instalacja i offline | PWA (manifest + service worker) | Ikona na ekranie głównym telefonu, działanie bez internetu |
 | Testy | wbudowany w Node.js `node --test` | Testy obliczeń i walidacji bez instalowania bibliotek |
 | Uruchamianie lokalne | `python -m http.server` | Prosty serwer bez instalowania niczego |
@@ -39,9 +40,10 @@ BudgetApp/
 ├── tests/
 │   └── budget.test.js    # testy obliczeń i walidacji
 ├── fonts/                # czcionka Inter (dołączona do projektu, żeby działała offline)
-├── icons/                # ikony aplikacji
+├── icons/                # ikony aplikacji (SVG oraz PNG 192 i 512 px wyeksportowane z SVG)
 ├── AGENTS.md            # zasady pracy (dla agentów AI i ludzi)
 ├── CLAUDE.md            # wczytuje AGENTS.md w Claude Code
+├── PLAN.md              # szczegółowy plan działania (zadania, weryfikacja, ryzyka)
 ├── SPEC.md
 └── STACK.md
 ```
@@ -69,7 +71,7 @@ Dane są zapisane w `localStorage` pod kluczem `budgetapp-data`. Ten sam format 
 ```
 
 - `amount` to kwota w **groszach**, jako liczba całkowita (900000 = 9 000,00 zł). Dzięki temu nie powstają błędy zaokrągleń liczb zmiennoprzecinkowych.
-- Oszczędności i inwestycje liczone z % są zaokrąglane do pełnego grosza.
+- Oszczędności i inwestycje liczone z % są zaokrąglane do pełnego grosza, połówki w górę.
 - Miesiąc bez planu nie ma swojego wpisu w `months`.
 - Pole `version` pozwoli w przyszłości bezpiecznie zmieniać format danych.
 
@@ -77,9 +79,10 @@ Dane są zapisane w `localStorage` pod kluczem `budgetapp-data`. Ten sam format 
 
 ## 4. Plan pracy na weekend
 
-Każdy krok to mała, zamknięta całość: AI generuje kod, właściciel projektu go przegląda i testuje, a po jego akceptacji robimy commit i wysyłamy zmiany na GitHub (zob. AGENTS.md).
+Każdy krok to mała, zamknięta całość: AI generuje kod, właściciel projektu go przegląda i testuje, a po jego akceptacji robimy commit i wysyłamy zmiany na GitHub (zob. AGENTS.md). Szczegółowy opis każdego kroku — rezultat, definicja ukończenia, weryfikacja i ryzyka — jest w [PLAN.md](PLAN.md).
 
 **Sobota**
+- [x] Uzgodnienie otwartych pytań i plan działania (PLAN.md).
 - [ ] Szkielet projektu, repozytorium na GitHubie, pusta strona działająca lokalnie.
 - [ ] `budget.js`: obliczenia i walidacja oraz testy.
 - [ ] `storage.js`: zapis i odczyt danych.
