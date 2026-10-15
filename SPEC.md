@@ -58,7 +58,7 @@ Aplikacja nie przechowuje danych osobowych, numerów kont, haseł ani danych log
 | # | Funkcja |
 |---|---|
 | F1 | Przełączanie miesięcy strzałkami: miesiące poprzednie, bieżący i następny |
-| F2 | Tworzenie planu: „Skopiuj z [miesiąc]” albo „Zacznij od zera” |
+| F2 | Tworzenie planu: „Skopiuj z: [miesiąc]” albo „Zacznij od zera” |
 | F3 | Przychody: dodawanie, edycja w miejscu, usuwanie, suma |
 | F4 | Podział: suwaki % oszczędności i % inwestycji z podglądem kwot |
 | F5 | Planowane wydatki: dodawanie, edycja w miejscu, usuwanie, suma |
@@ -80,7 +80,7 @@ Aplikacja nie przechowuje danych osobowych, numerów kont, haseł ani danych log
 |---|---|
 | Przychód | suma przychodów miesiąca |
 | Oszczędności | Przychód × % oszczędności |
-| Inwestycje | Przychód × % inwestycji |
+| Inwestycje | Przychód × (% oszczędności + % inwestycji) − Oszczędności |
 | Do wydania | Przychód − Oszczędności − Inwestycje |
 | Planowane wydatki | suma planowanych wydatków |
 | **Zostało** | Do wydania − Planowane wydatki |
@@ -111,16 +111,18 @@ Status wynika z daty ustawionej w urządzeniu.
 Każda zmiana, która złamałaby regułę, jest **odrzucana**. Pod polem pojawia się komunikat, a poprzednia wartość zostaje bez zmian. Reguły:
 1. % oszczędności i % inwestycji to liczby całkowite 0–100, a ich suma nie przekracza 100.
 2. Kwota „Zostało” nigdy nie jest ujemna. Dotyczy to dodawania i zwiększania wydatków, a także zmniejszania i usuwania przychodów oraz zmiany %.
-3. Każda kwota jest większa od 0 i ma najwyżej 2 miejsca po przecinku.
-4. Każdy przychód i wydatek ma niepustą nazwę.
+3. Każda kwota jest większa od 0, nie większa niż 10 000 000 zł i ma najwyżej 2 miejsca po przecinku.
+4. Każdy przychód i wydatek ma niepustą nazwę o długości najwyżej 50 znaków. Spacje na początku i końcu nazwy są usuwane.
 
 Wyjątek: suwak % nie wraca do poprzedniej wartości, tylko zatrzymuje się na najwyższej dozwolonej wartości (zgodnej z regułami 1 i 2), a pod nim pojawia się komunikat.
+
+Gdy usunięcie pozycji zostaje odrzucone, komunikat pojawia się pod tą pozycją na liście.
 
 ### 3.5 Format i dokładność
 - Waluta to wyłącznie PLN, a interfejs jest po polsku.
 - Kwoty wyświetlają się z groszami, np. `1 234,56 zł`.
-- Kwotę można wpisać z przecinkiem albo z kropką, np. `12,50` lub `12.50`.
-- Obliczenia są dokładne co do grosza, bez błędów zaokrągleń. Oszczędności i inwestycje zaokrąglamy do pełnego grosza, połówki w górę (np. 12,5 gr → 13 gr).
+- Kwotę można wpisać z przecinkiem albo z kropką, np. `12,50` lub `12.50`. Spacje są pomijane, np. `1 234,50`.
+- Obliczenia są dokładne co do grosza, bez błędów zaokrągleń. Oszczędności oraz łączną kwotę oszczędności i inwestycji zaokrąglamy do pełnego grosza, połówki w górę (np. 12,5 gr → 13 gr). Inwestycje to różnica tych dwóch kwot. Dzięki temu oszczędności i inwestycje razem nigdy nie przekraczają przychodu (np. 3 333,33 zł przy 50% + 50%: oszczędności 1 666,67 zł, inwestycje 1 666,66 zł, zostało 0,00 zł).
 
 ---
 
@@ -129,12 +131,12 @@ Wyjątek: suwak % nie wraca do poprzedniej wartości, tylko zatrzymuje się na n
 ### 4.1 Elementy wspólne
 - **Nagłówek:** strzałka w lewo, nazwa miesiąca (np. „Październik 2026”), strzałka w prawo. Wybrany miesiąc obowiązuje na wszystkich zakładkach.
 - **Dolny pasek zakładek:** Plan, Przychody, Wydatki, Więcej.
-- **Miesiąc bez planu:** na każdej zakładce widać kartę „Zaplanuj: [miesiąc]” z przyciskami tworzenia planu. Dla zamkniętego miesiąca widać napis „Brak planu”.
+- **Miesiąc bez planu:** na zakładkach Plan, Przychody i Wydatki widać kartę „Zaplanuj: [miesiąc]” z przyciskami tworzenia planu. Dla zamkniętego miesiąca widać napis „Brak planu”. Zakładka Więcej działa zawsze tak samo.
 
 ### 4.2 Plan
 - Karta główna: „Zostało do zaplanowania”, duża kwota i pasek podziału (oszczędności, inwestycje, wydatki, zostało).
 - Karta z suwakami: Oszczędności i Inwestycje, każdy z wartością % i kwotą w zł.
-- Miesiąc zamknięty: oznaczenie „Zamknięty”, przygaszone kolory, zamiast suwaków same wartości.
+- Miesiąc zamknięty: oznaczenie „Zamknięty”, przygaszone kolory (zob. §5), zamiast suwaków same wartości.
 
 ### 4.3 Przychody i Wydatki
 Oba ekrany są zbudowane tak samo:
@@ -146,7 +148,7 @@ Oba ekrany są zbudowane tak samo:
 
 ### 4.4 Więcej
 - **Eksportuj dane:** pobiera plik z kopią wszystkich danych.
-- **Importuj dane:** wczytuje plik, po potwierdzeniu, że obecne dane zostaną zastąpione. Niepoprawny plik daje komunikat błędu i niczego nie zmienia.
+- **Importuj dane:** wczytuje plik, po potwierdzeniu, że obecne dane zostaną zastąpione. Niepoprawny plik daje komunikat błędu i niczego nie zmienia. Plik jest niepoprawny, jeśli nie jest kopią z BudgetApp albo którykolwiek miesiąc łamie reguły z §3.4. Plany na miesiące późniejsze niż następny są zachowywane i stają się widoczne, gdy nadejdzie ich czas.
 - **Usuń plan miesiąca:** z potwierdzeniem, tylko dla bieżącego i następnego miesiąca.
 - Informacja: „Dane zapisane tylko na tym urządzeniu”.
 - Potwierdzenia wyświetlają się w oknie w stylu aplikacji, z przyciskiem opisującym skutek (np. „Zastąp dane”, „Usuń plan”) oraz przyciskiem „Anuluj”.
@@ -169,6 +171,16 @@ Oba ekrany są zbudowane tak samo:
 | Tekst | `#17211B` |
 | Pasek zakładek | `#E9F2EC` |
 | Błąd | `#B3261E` |
+| Tekst drugorzędny | `#5B6B61` |
+| Obramowanie pól | `#7C8B81` |
+| Tor suwaka (niewypełniony) | `#C8DDD0` |
+| Pasek podziału: oszczędności | `#1B6B4A` |
+| Pasek podziału: inwestycje | `#52A57D` |
+| Pasek podziału: wydatki | `#9CCFB2` |
+| Pasek podziału: zostało | `#FFFFFF` |
+
+- Element nieaktywny (np. strzałka): kolor tekstu z przezroczystością 38%.
+- Miesiąc zamknięty: treść kart z przezroczystością 60%, plakietka „Zamknięty” w kolorze tekstu drugorzędnego.
 
 - Zaokrąglenia: karty 24 px, pola 12 px, przyciski i suwaki w pełni zaokrąglone.
 - Suwaki: grube (22 px), z zielonym wypełnieniem i białym, okrągłym uchwytem wewnątrz.

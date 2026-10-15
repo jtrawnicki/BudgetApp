@@ -18,7 +18,10 @@ w nich brakuje — zatrzymaj się i zapytaj właściciela projektu. Nie zgaduj.
 - HTML: semantyczne znaczniki, każde pole ma etykietę, przyciski
   z samą ikoną mają `aria-label`.
 - CSS: najpierw telefon (mobile-first); kolory i zaokrąglenia tylko
-  jako zmienne CSS zgodne z `SPEC.md` (sekcja 5); bez stylów inline.
+  jako zmienne CSS zgodne z `SPEC.md` (sekcja 5); bez atrybutów
+  `style="…"` w HTML. Wartości zmieniane w trakcie działania (np. szerokość
+  segmentów paska, wypełnienie suwaka) JS ustawia jako zmienne CSS:
+  `element.style.setProperty('--nazwa', wartość)`.
 - JavaScript: `const`/`let`, bez zmiennych globalnych, małe funkcje
   o jednej odpowiedzialności.
 - `js/budget.js` — wyłącznie obliczenia i walidacja: bez DOM
@@ -47,7 +50,7 @@ w nich brakuje — zatrzymaj się i zapytaj właściciela projektu. Nie zgaduj.
 ## 4. Sprawdzanie pracy
 Po każdej zmianie, przed zgłoszeniem jej jako gotowej:
 - uruchom testy — wszystkie muszą przechodzić,
-- uruchom aplikację i sprawdź zmianę w przeglądarce w szerokościach
+- jeśli zmiana dotyczy interfejsu, uruchom aplikację i sprawdź ją w przeglądarce w szerokościach
   360, 768 i 1280 px; przy 360 px nie może być poziomego przewijania,
 - sprawdź konsolę przeglądarki — bez błędów,
 - przejdź punkty „Definicja ukończenia” i „Weryfikacja” z issue,
@@ -66,12 +69,16 @@ Po każdej zmianie, przed zgłoszeniem jej jako gotowej:
   na GitHub Pages aplikacja działa pod podścieżką `/BudgetApp/`.
 - Funkcje zależne od daty dostają „dziś” jako parametr — inaczej
   nie da się przetestować statusów miesięcy ani przełomu roku.
+- Daty liczymy w czasie lokalnym urządzenia, nie w UTC. `toISOString()`
+  zwraca czas UTC, więc tuż po północy pokazałby zły dzień albo miesiąc.
+  Dotyczy to też daty w nazwie pliku eksportu.
 - Formater kwot piszemy sami: `Intl.NumberFormat('pl-PL')` nie grupuje
   liczb czterocyfrowych (`1234,56 zł` zamiast `1 234,56 zł`).
 - Walidacja danych (także całego pliku importu) jest w `budget.js`,
   żeby dało się ją testować w Node. `storage.js` tylko z niej korzysta
   i zapisuje dane dopiero, gdy są poprawne.
-- Przy każdej zmianie plików aplikacji podnieś numer wersji cache
+- Od zadania Z9, gdy istnieje już `sw.js`, przy każdej zmianie plików
+  aplikacji podnieś numer wersji cache
   w `sw.js` — inaczej telefon może dalej pokazywać starą wersję.
 
 ## 7. Bezpieczeństwo i prywatność
@@ -95,7 +102,8 @@ Po każdej zmianie, przed zgłoszeniem jej jako gotowej:
 ## 9. Aktualizowanie planu
 - Commit kończący zadanie ma w opisie `Closes #N` (numer issue),
   dzięki czemu issue zamknie się po wysłaniu na GitHub. Commit robimy
-  dopiero po akceptacji właściciela (zob. sekcja 3).
+  dopiero po akceptacji właściciela (zob. sekcja 3). N to numer issue,
+  a nie numer zadania Z (np. Z1 to #2).
 - Nowe zadania i znalezione problemy zgłaszaj jako issues — po zgodzie
   właściciela.
 - Jeśli w trakcie pracy okaże się, że trzeba odejść od `SPEC.md`

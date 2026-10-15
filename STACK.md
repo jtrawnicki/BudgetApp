@@ -39,8 +39,10 @@ BudgetApp/
 │   └── storage.js        # zapis, odczyt, eksport, import
 ├── tests/
 │   └── budget.test.js    # testy obliczeń i walidacji
-├── fonts/                # czcionka Inter (dołączona do projektu, żeby działała offline)
-├── icons/                # ikony aplikacji (SVG oraz PNG 192 i 512 px wyeksportowane z SVG)
+├── fonts/                # czcionka Inter (dołączona do projektu, żeby działała offline) oraz plik licencji OFL.txt
+├── icons/                # ikony aplikacji (SVG oraz PNG 180 px dla iPhone'a, 192 i 512 px, wyeksportowane z SVG
+│                         #   jednorazowym pomocniczym skryptem w przeglądarce, który nie trafia do repozytorium)
+├── .gitignore            # pliki systemowe i edytora, których nie wrzucamy do repozytorium
 ├── AGENTS.md            # zasady pracy (dla agentów AI i ludzi)
 ├── CLAUDE.md            # wczytuje AGENTS.md w Claude Code
 ├── SPEC.md
@@ -70,7 +72,7 @@ Dane są zapisane w `localStorage` pod kluczem `budgetapp-data`. Ten sam format 
 ```
 
 - `amount` to kwota w **groszach**, jako liczba całkowita (900000 = 9 000,00 zł). Dzięki temu nie powstają błędy zaokrągleń liczb zmiennoprzecinkowych.
-- Oszczędności i inwestycje liczone z % są zaokrąglane do pełnego grosza, połówki w górę.
+- Zasady zaokrąglania oszczędności i inwestycji opisuje SPEC §3.5.
 - Miesiąc bez planu nie ma swojego wpisu w `months`.
 - Pole `version` pozwoli w przyszłości bezpiecznie zmieniać format danych.
 
