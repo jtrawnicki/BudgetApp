@@ -15,6 +15,7 @@ import {
   validatePlan,
   validateData,
   monthKeyFromDate,
+  exportFileName,
   addMonths,
   monthName,
   getMonthStatus,
@@ -317,6 +318,20 @@ describe('monthKeyFromDate i addMonths', () => {
     assert.equal(addMonths('2027-01', -1), '2026-12');
     assert.equal(addMonths('2026-10', 0), '2026-10');
     assert.equal(addMonths('2026-10', 15), '2028-01');
+  });
+});
+
+describe('exportFileName', () => {
+  it('ma wzór budgetapp-kopia-RRRR-MM-DD.json z zerami wiodącymi', () => {
+    assert.equal(exportFileName(new Date(2026, 9, 5, 12, 0)), 'budgetapp-kopia-2026-10-05.json');
+  });
+
+  it('tuż po północy 1 stycznia bierze datę lokalną, a nie UTC', () => {
+    assert.equal(exportFileName(new Date(2027, 0, 1, 0, 30)), 'budgetapp-kopia-2027-01-01.json');
+  });
+
+  it('tuż przed północą 31 grudnia zostaje przy starym roku', () => {
+    assert.equal(exportFileName(new Date(2026, 11, 31, 23, 59)), 'budgetapp-kopia-2026-12-31.json');
   });
 });
 

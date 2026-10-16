@@ -207,6 +207,13 @@ export function monthKeyFromDate(date) {
   return toMonthKey(date.getFullYear(), date.getMonth());
 }
 
+// Data w nazwie pliku też w czasie lokalnym: kopia zrobiona 1 stycznia o 0:30
+// nie może mieć w nazwie 31 grudnia.
+export function exportFileName(date) {
+  const day = String(date.getDate()).padStart(2, '0');
+  return `budgetapp-kopia-${monthKeyFromDate(date)}-${day}.json`;
+}
+
 export function addMonths(key, count) {
   const { year, monthIndex } = parseMonthKey(key);
   const total = year * 12 + monthIndex + count;
