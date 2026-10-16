@@ -1,0 +1,11 @@
+/* Wymiary elementów liczone razem z obramowaniem i odstępem wewnętrznym,
+   co upraszcza układ i zapobiega poziomemu przewijaniu na telefonie. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}

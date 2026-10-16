@@ -1,0 +1,8 @@
+# Pliki systemowe
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Ustawienia edytora i narzędzi
+.vscode/
+.claude/
