@@ -229,6 +229,135 @@ button:disabled {
   color: var(--color-error);
 }
 
+/* ---------- Ekran Plan ---------- */
+
+.plan-content {
+  display: grid;
+  gap: 16px;
+}
+
+.summary-label {
+  font-weight: 500;
+}
+
+/* Cyfry o równej szerokości: kwota nie „skacze” przy przesuwaniu suwaka. */
+.summary-amount {
+  margin-top: 4px;
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.split-bar {
+  display: flex;
+  gap: 4px;
+  height: 16px;
+  margin-top: 20px;
+}
+
+/* --share ustawia JS (kwota segmentu w groszach); flex-grow dzieli szerokość proporcjonalnie. */
+.split-segment {
+  flex: var(--share, 0) 1 0;
+  border-radius: var(--radius-full);
+}
+
+.split-segment--savings {
+  background: var(--color-split-savings);
+}
+
+.split-segment--investments {
+  background: var(--color-split-investments);
+}
+
+.split-segment--expenses {
+  background: var(--color-split-expenses);
+}
+
+.split-segment--remaining {
+  background: var(--color-split-remaining);
+}
+
+.sliders {
+  display: grid;
+  gap: 24px;
+}
+
+.slider-field {
+  display: grid;
+  gap: 8px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.slider-label {
+  font-weight: 600;
+}
+
+.slider-value {
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ---------- Suwak ---------- */
+
+/* Tor ma 22 px, a biały uchwyt 14 px leży wewnątrz z odstępem 4 px.
+   Uchwyt ma przezroczystą ramkę 4 px, dzięki czemu przeglądarka przesuwa go
+   z tym samym odstępem od brzegów toru. --fill (0–1) ustawia JS. */
+.slider {
+  --track-height: 22px;
+  --thumb-inset: 4px;
+  /* Wypełnienie kończy się za uchwytem, więc uchwyt zawsze leży na zielonym. */
+  --fill-end: calc(var(--track-height) + (100% - var(--track-height)) * var(--fill, 0));
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: var(--track-height);
+  margin: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: var(--track-height);
+  border-radius: var(--radius-full);
+  background: linear-gradient(to right, var(--color-accent) var(--fill-end), var(--color-slider-track) var(--fill-end));
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--track-height);
+  height: var(--track-height);
+  border: var(--thumb-inset) solid transparent;
+  border-radius: 50%;
+  background: var(--color-card);
+  background-clip: content-box;
+}
+
+/* Firefox ma własne nazwy elementów suwaka. */
+.slider::-moz-range-track {
+  height: var(--track-height);
+  border-radius: var(--radius-full);
+  background: linear-gradient(to right, var(--color-accent) var(--fill-end), var(--color-slider-track) var(--fill-end));
+}
+
+.slider::-moz-range-thumb {
+  box-sizing: border-box;
+  width: var(--track-height);
+  height: var(--track-height);
+  border: var(--thumb-inset) solid transparent;
+  border-radius: 50%;
+  background: var(--color-card);
+  background-clip: content-box;
+}
+
 /* ---------- Pasek zakładek ---------- */
 
 .tab-bar {

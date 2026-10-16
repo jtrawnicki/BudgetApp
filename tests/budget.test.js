@@ -12,6 +12,7 @@ import {
   formatAmount,
   validatePercents,
   maxSliderValue,
+  clampSliderValue,
   validatePlan,
   validateData,
   monthKeyFromDate,
@@ -217,6 +218,34 @@ describe('maxSliderValue', () => {
   it('zwraca 0, gdy wydatki zajmują cały przychód', () => {
     const plan = makePlan({ income: 100000, expense: 100000 });
     assert.equal(maxSliderValue(plan, 'savings'), 0);
+  });
+});
+
+describe('clampSliderValue', () => {
+  it('przepuszcza dozwoloną wartość bez komunikatu', () => {
+    const plan = makePlan({ income: 100000, savings: 30, investment: 20 });
+    assert.deepEqual(clampSliderValue(plan, 'savings', 80), { value: 80, error: null });
+  });
+
+  it('przy sumie powyżej 100% zatrzymuje na granicy z komunikatem o sumie', () => {
+    const plan = makePlan({ income: 100000, savings: 30, investment: 20 });
+    assert.deepEqual(clampSliderValue(plan, 'savings', 90), { value: 80, error: MESSAGES.percentSumTooHigh });
+  });
+
+  it('gdy granicę wyznacza „Zostało”, pokazuje komunikat o „Zostało”', () => {
+    // 1000 zł przychodu, 700 zł wydatków: razem najwyżej 30%.
+    const plan = makePlan({ income: 100000, expense: 70000, savings: 10 });
+    assert.deepEqual(clampSliderValue(plan, 'investment', 50), { value: 20, error: MESSAGES.remainingNegative });
+  });
+
+  it('przy przychodzie 0 zł ogranicza tylko suma 100%', () => {
+    const plan = makePlan({ investment: 40 });
+    assert.deepEqual(clampSliderValue(plan, 'savings', 100), { value: 60, error: MESSAGES.percentSumTooHigh });
+  });
+
+  it('gdy drugi suwak ma 100%, ten stoi na 0 z komunikatem o sumie', () => {
+    const plan = makePlan({ income: 100000, investment: 100 });
+    assert.deepEqual(clampSliderValue(plan, 'savings', 5), { value: 0, error: MESSAGES.percentSumTooHigh });
   });
 });
 

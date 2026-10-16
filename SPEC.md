@@ -118,6 +118,8 @@ Wyjątek: suwak % nie wraca do poprzedniej wartości, tylko zatrzymuje się na n
 
 Gdy usunięcie pozycji zostaje odrzucone, komunikat pojawia się pod tą pozycją na liście.
 
+Gdy przeglądarka nie pozwala zapisać danych (np. zablokowany zapis danych strony), zmiana też jest **odrzucana**: wraca poprzednia wartość (także na suwaku), a pod elementem, którego dotyczyła zmiana, pojawia się komunikat „Nie udało się zapisać zmiany. Przeglądarka nie pozwala zapisywać danych na tym urządzeniu.”. Dotyczy to każdej zmiany danych: dodania, edycji i usunięcia pozycji, zmiany %, utworzenia i usunięcia planu. Dzięki temu ekran zawsze pokazuje to, co jest zapisane.
+
 ### 3.5 Format i dokładność
 - Waluta to wyłącznie PLN, a interfejs jest po polsku.
 - Kwoty wyświetlają się z groszami, np. `1 234,56 zł`.
@@ -148,7 +150,7 @@ Oba ekrany są zbudowane tak samo:
 
 ### 4.4 Więcej
 - **Eksportuj dane:** pobiera plik z kopią wszystkich danych.
-- **Importuj dane:** wczytuje plik, po potwierdzeniu, że obecne dane zostaną zastąpione. Niepoprawny plik daje komunikat błędu i niczego nie zmienia. Plik jest niepoprawny, jeśli nie jest kopią z BudgetApp albo którykolwiek miesiąc łamie reguły z §3.4. Plany na miesiące późniejsze niż następny są zachowywane i stają się widoczne, gdy nadejdzie ich czas.
+- **Importuj dane:** wczytuje plik, po potwierdzeniu, że obecne dane zostaną zastąpione. Niepoprawny plik daje komunikat błędu i niczego nie zmienia. Plik jest niepoprawny, jeśli nie jest kopią z BudgetApp albo którykolwiek miesiąc łamie reguły z §3.4. Plany na miesiące późniejsze niż następny są zachowywane i stają się widoczne, gdy nadejdzie ich czas. Gdy plik jest poprawny, ale przeglądarka nie pozwala zapisać danych, pojawia się komunikat „Nie udało się zapisać danych z pliku. Obecne dane nie zostały zmienione.”.
 - **Usuń plan miesiąca:** z potwierdzeniem, tylko dla bieżącego i następnego miesiąca.
 - Informacja: „Dane zapisane tylko na tym urządzeniu”.
 - Potwierdzenia wyświetlają się w oknie w stylu aplikacji, z przyciskiem opisującym skutek (np. „Zastąp dane”, „Usuń plan”) oraz przyciskiem „Anuluj”.
