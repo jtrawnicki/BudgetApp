@@ -27,8 +27,44 @@
     <main>
       <section class="view" id="view-plan" aria-labelledby="view-plan-title">
         <h2 class="view-title" id="view-plan-title">Plan</h2>
-        <div class="card card--main">
+        <!-- Widoczne, gdy miesiąc nie ma planu. Tworzenie planu to zadanie Z7. -->
+        <div class="card card--main" id="plan-empty">
           <p>Ten ekran pojawi się wkrótce.</p>
+        </div>
+
+        <div class="plan-content" id="plan-content" hidden>
+          <div class="card card--main">
+            <p class="summary-label">Zostało do zaplanowania</p>
+            <p class="summary-amount" id="remaining-amount"></p>
+            <div class="split-bar" id="split-bar" role="img">
+              <span class="split-segment split-segment--savings" data-part="savings"></span>
+              <span class="split-segment split-segment--investments" data-part="investments"></span>
+              <span class="split-segment split-segment--expenses" data-part="expenses"></span>
+              <span class="split-segment split-segment--remaining" data-part="remaining"></span>
+            </div>
+          </div>
+
+          <div class="card sliders">
+            <div class="slider-field">
+              <div class="slider-header">
+                <label class="slider-label" for="savings-slider">Oszczędności</label>
+                <output class="slider-value" id="savings-value" for="savings-slider"></output>
+              </div>
+              <input type="range" class="slider" id="savings-slider" data-slider="savings"
+                min="0" max="100" step="1" aria-describedby="savings-error">
+              <p class="field-error" id="savings-error" hidden></p>
+            </div>
+
+            <div class="slider-field">
+              <div class="slider-header">
+                <label class="slider-label" for="investment-slider">Inwestycje</label>
+                <output class="slider-value" id="investment-value" for="investment-slider"></output>
+              </div>
+              <input type="range" class="slider" id="investment-slider" data-slider="investment"
+                min="0" max="100" step="1" aria-describedby="investment-error">
+              <p class="field-error" id="investment-error" hidden></p>
+            </div>
+          </div>
         </div>
       </section>
 

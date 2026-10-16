@@ -44,12 +44,19 @@ w nich brakuje — zatrzymaj się i zapytaj właściciela projektu. Nie zgaduj.
 - Jedna zmiana = jeden cel. Nie zmieniaj plików niezwiązanych z krokiem.
 - Przed rozpoczęciem kroku napisz krótko, co zamierzasz zrobić,
   i poczekaj na zgodę.
-- Po zakończeniu kroku zatrzymaj się, pokaż efekt i poczekaj
-  na akceptację. Dopiero wtedy commit i wysłanie na GitHub.
-- Gdy właściciel potwierdzi implementację: zrób commit, wyślij go
-  na GitHub (push), upewnij się, że issue jest zamknięte (jeśli
-  `Closes #N` go nie zamknął, zamknij je ręcznie), i zatrzymaj serwer
-  z aplikacją uruchomiony do sprawdzania.
+- Każde zadanie (issue) robimy na osobnej gałęzi utworzonej z aktualnego
+  `main`, np. `z5-ekran-plan`. Nigdy nie commitujemy bezpośrednio na `main`.
+- Po zakończeniu kroku: commit na gałęzi, push gałęzi i Pull Request
+  do `main`. Opis PR mówi, co zrobiono, co sprawdzono, a czego nie,
+  i zawiera `Closes #N`. Potem zatrzymaj się i poczekaj, aż właściciel
+  sprawdzi PR.
+- Poprawki po uwagach właściciela to kolejne commity na tej samej
+  gałęzi, bez nadpisywania historii.
+- Gdy właściciel zaakceptuje PR: zrób merge do `main` (zwykły merge
+  commit), usuń gałąź, przełącz się lokalnie na `main` i pobierz zmiany,
+  upewnij się, że issue jest zamknięte (jeśli `Closes #N` go nie zamknął,
+  zamknij je ręcznie), i zatrzymaj serwer z aplikacją uruchomiony
+  do sprawdzania.
 
 ## 4. Sprawdzanie pracy
 Po każdej zmianie, przed zgłoszeniem jej jako gotowej:
@@ -104,8 +111,8 @@ Po każdej zmianie, przed zgłoszeniem jej jako gotowej:
 - Ikony to własne, proste SVG — bez bibliotek ikon.
 
 ## 9. Aktualizowanie planu
-- Commit kończący zadanie ma w opisie `Closes #N` (numer issue),
-  dzięki czemu issue zamknie się po wysłaniu na GitHub. Commit robimy
+- Pull Request zadania ma w opisie `Closes #N` (numer issue),
+  dzięki czemu issue zamknie się po merge'u do `main`. Merge robimy
   dopiero po akceptacji właściciela (zob. sekcja 3). N to numer issue,
   a nie numer zadania Z (np. Z1 to #2).
 - Nowe zadania i znalezione problemy zgłaszaj jako issues — po zgodzie

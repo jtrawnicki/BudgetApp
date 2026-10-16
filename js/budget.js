@@ -17,6 +17,7 @@ export const MESSAGES = Object.freeze({
   percentSumTooHigh: 'Suma procentów nie może przekraczać 100%.',
   remainingNegative: 'Ta zmiana sprawiłaby, że „Zostało” byłoby ujemne.',
   importInvalid: 'To nie jest poprawna kopia danych BudgetApp.',
+  saveFailed: 'Nie udało się zapisać zmiany. Przeglądarka nie pozwala zapisywać danych na tym urządzeniu.',
 });
 
 // Spacja nierozdzielająca: kwota nie rozbije się na dwie linie.
@@ -30,7 +31,7 @@ const MONTH_NAMES = [
 const AMOUNT_PATTERN = /^(\d+)(?:[.,](\d+))?$/;
 const MONTH_KEY_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
-const SLIDER_FIELDS = Object.freeze({
+export const SLIDER_FIELDS = Object.freeze({
   savings: 'savingsPercent',
   investment: 'investmentPercent',
 });
@@ -137,6 +138,18 @@ export function maxSliderValue(plan, slider) {
     if (calculateSummary({ ...plan, [field]: percent }).remaining >= 0) return percent;
   }
   return 0;
+}
+
+// Wartość, na której suwak ma się zatrzymać, i komunikat, gdy trzeba go było zatrzymać.
+// Komunikat mówi o tej regule, która wyznaczyła granicę.
+export function clampSliderValue(plan, slider, requested) {
+  const max = maxSliderValue(plan, slider);
+  if (requested <= max) return { value: requested, error: null };
+
+  const field = SLIDER_FIELDS[slider];
+  const otherPercent = plan.savingsPercent + plan.investmentPercent - plan[field];
+  const error = max === 100 - otherPercent ? MESSAGES.percentSumTooHigh : MESSAGES.remainingNegative;
+  return { value: max, error };
 }
 
 // ---------- Walidacja ----------
