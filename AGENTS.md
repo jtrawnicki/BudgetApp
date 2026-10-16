@@ -46,6 +46,10 @@ w nich brakuje — zatrzymaj się i zapytaj właściciela projektu. Nie zgaduj.
   i poczekaj na zgodę.
 - Po zakończeniu kroku zatrzymaj się, pokaż efekt i poczekaj
   na akceptację. Dopiero wtedy commit i wysłanie na GitHub.
+- Gdy właściciel potwierdzi implementację: zrób commit, wyślij go
+  na GitHub (push), upewnij się, że issue jest zamknięte (jeśli
+  `Closes #N` go nie zamknął, zamknij je ręcznie), i zatrzymaj serwer
+  z aplikacją uruchomiony do sprawdzania.
 
 ## 4. Sprawdzanie pracy
 Po każdej zmianie, przed zgłoszeniem jej jako gotowej:
