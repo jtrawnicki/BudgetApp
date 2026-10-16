@@ -185,7 +185,7 @@ Oba ekrany są zbudowane tak samo:
 - Miesiąc zamknięty: treść kart z przezroczystością 60%, plakietka „Zamknięty” w kolorze tekstu drugorzędnego.
 
 - Zaokrąglenia: karty 24 px, pola 12 px, przyciski i suwaki w pełni zaokrąglone.
-- Suwaki: grube (22 px), z zielonym wypełnieniem i białym, okrągłym uchwytem wewnątrz.
+- Suwaki: tor grubości 22 px z zielonym wypełnieniem. Okrągły biały uchwyt z zieloną obwódką jest nieco większy niż tor (28 px), a wypełnienie kończy się pod uchwytem.
 - Pasek podziału: 4 zaokrąglone segmenty z odstępami.
 - Aktywna zakładka: ikona w zielonej „pigułce”.
 - Układ projektowany najpierw pod telefon. Na komputerze aplikacja ma maksymalnie 480 px szerokości i jest wyśrodkowana.

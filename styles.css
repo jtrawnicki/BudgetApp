@@ -307,18 +307,20 @@ button:disabled {
 
 /* ---------- Suwak ---------- */
 
-/* Tor ma 22 px, a biały uchwyt 14 px leży wewnątrz z odstępem 4 px.
-   Uchwyt ma przezroczystą ramkę 4 px, dzięki czemu przeglądarka przesuwa go
-   z tym samym odstępem od brzegów toru. --fill (0–1) ustawia JS. */
+/* Tor ma 22 px, a biały uchwyt z zieloną obwódką 28 px, czyli trochę więcej
+   (obwódka odróżnia biały uchwyt od białej karty). Wypełnienie kończy się
+   na środku uchwytu, więc nic za nim nie wystaje. --fill (0–1) ustawia JS. */
 .slider {
   --track-height: 22px;
-  --thumb-inset: 4px;
-  /* Wypełnienie kończy się za uchwytem, więc uchwyt zawsze leży na zielonym. */
-  --fill-end: calc(var(--track-height) + (100% - var(--track-height)) * var(--fill, 0));
+  --thumb-size: 28px;
+  --thumb-ring: 3px;
+  /* Środek uchwytu: przeglądarka przesuwa uchwyt od 0 do (szerokość − uchwyt). */
+  --fill-end: calc(var(--thumb-size) / 2 + (100% - var(--thumb-size)) * var(--fill, 0));
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: var(--track-height);
+  /* Wysokość uchwytu, żeby nie był przycięty. */
+  height: var(--thumb-size);
   margin: 0;
   border-radius: var(--radius-full);
   background: transparent;
@@ -331,17 +333,18 @@ button:disabled {
   background: linear-gradient(to right, var(--color-accent) var(--fill-end), var(--color-slider-track) var(--fill-end));
 }
 
+/* Chrome i Safari stawiają uchwyt na górze toru; ujemny margines go wyśrodkowuje. */
 .slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: var(--track-height);
-  height: var(--track-height);
-  border: var(--thumb-inset) solid transparent;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  margin-top: calc((var(--track-height) - var(--thumb-size)) / 2);
+  border: var(--thumb-ring) solid var(--color-accent);
   border-radius: 50%;
   background: var(--color-card);
-  background-clip: content-box;
 }
 
-/* Firefox ma własne nazwy elementów suwaka. */
+/* Firefox ma własne nazwy elementów suwaka i sam wyśrodkowuje uchwyt. */
 .slider::-moz-range-track {
   height: var(--track-height);
   border-radius: var(--radius-full);
@@ -350,12 +353,11 @@ button:disabled {
 
 .slider::-moz-range-thumb {
   box-sizing: border-box;
-  width: var(--track-height);
-  height: var(--track-height);
-  border: var(--thumb-inset) solid transparent;
+  width: var(--thumb-size);
+  height: var(--thumb-size);
+  border: var(--thumb-ring) solid var(--color-accent);
   border-radius: 50%;
   background: var(--color-card);
-  background-clip: content-box;
 }
 
 /* ---------- Pasek zakładek ---------- */
