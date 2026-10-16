@@ -1,3 +1,48 @@
+/* ---------- Czcionka ---------- */
+
+/* Jeden plik „zmienny” zawiera wszystkie grubości, więc wystarczy jedna reguła.
+   Plik jest w projekcie, żeby czcionka działała bez internetu. */
+@font-face {
+  font-family: 'Inter';
+  src: url('fonts/InterVariable.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Zmienne (SPEC §5) ---------- */
+
+:root {
+  --color-background: #F5FAF6;
+  --color-card: #FFFFFF;
+  --color-main-card: #D3EBDC;
+  --color-accent: #1B6B4A;
+  --color-text: #17211B;
+  --color-tab-bar: #E9F2EC;
+  --color-error: #B3261E;
+  --color-text-secondary: #5B6B61;
+  --color-field-border: #7C8B81;
+  --color-slider-track: #C8DDD0;
+  --color-split-savings: #1B6B4A;
+  --color-split-investments: #52A57D;
+  --color-split-expenses: #9CCFB2;
+  --color-split-remaining: #FFFFFF;
+  /* Kolor tekstu (#17211B) z przezroczystością 38%. */
+  --color-disabled: rgb(23 33 27 / 0.38);
+  --color-on-accent: var(--color-card);
+
+  --radius-card: 24px;
+  --radius-field: 12px;
+  /* Bardzo duży promień daje kształt „pigułki” niezależnie od wysokości elementu. */
+  --radius-full: 999px;
+
+  --page-padding: 16px;
+  --app-max-width: 480px;
+  --tab-bar-height: 80px;
+}
+
+/* ---------- Podstawy ---------- */
+
 /* Wymiary elementów liczone razem z obramowaniem i odstępem wewnętrznym,
    co upraszcza układ i zapobiega poziomemu przewijaniu na telefonie. */
 *,
@@ -6,6 +51,235 @@
   box-sizing: border-box;
 }
 
+/* Atrybut hidden ma zawsze wygrywać, nawet z regułami display niżej. */
+[hidden] {
+  display: none !important;
+}
+
 body {
   margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Ikony ---------- */
+
+.icon {
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.icon--filled {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* ---------- Układ ---------- */
+
+/* Najpierw telefon; na szerszym ekranie aplikacja ma najwyżej 480 px i jest wyśrodkowana. */
+.app {
+  max-width: var(--app-max-width);
+  margin: 0 auto;
+  min-height: 100vh;
+  /* Miejsce na przyklejony pasek zakładek, żeby nie zasłaniał końca treści. */
+  padding-bottom: calc(var(--tab-bar-height) + env(safe-area-inset-bottom));
+}
+
+.month-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 8px 0;
+}
+
+.month-name {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.view {
+  display: grid;
+  gap: 16px;
+  padding: var(--page-padding);
+}
+
+.view-title {
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+/* ---------- Karty ---------- */
+
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius-card);
+  padding: 20px;
+}
+
+.card--main {
+  background: var(--color-main-card);
+}
+
+/* ---------- Przyciski ---------- */
+
+.icon-button {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-full);
+  background: none;
+  cursor: pointer;
+}
+
+.icon-button:hover:not(:disabled) {
+  background: var(--color-tab-bar);
+}
+
+.button {
+  min-height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button--primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.button--secondary {
+  background: var(--color-tab-bar);
+  color: var(--color-accent);
+}
+
+button:disabled {
+  color: var(--color-disabled);
+  cursor: default;
+}
+
+/* ---------- Pola formularzy ---------- */
+
+.field {
+  display: grid;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+/* Rozmiar 16 px, bo przy mniejszym iPhone powiększa stronę po dotknięciu pola. */
+.field-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--color-field-border);
+  border-radius: var(--radius-field);
+  background: var(--color-card);
+  font-size: 16px;
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.field-input[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.field-error {
+  font-size: 14px;
+  color: var(--color-error);
+}
+
+/* ---------- Pasek zakładek ---------- */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  max-width: var(--app-max-width);
+  min-height: var(--tab-bar-height);
+  margin: 0 auto;
+  padding: 12px 4px calc(12px + env(safe-area-inset-bottom));
+  background: var(--color-tab-bar);
+}
+
+/* Gdy obok paska widać tło, zaokrąglone górne rogi wyglądają spójnie z kartami. */
+@media (min-width: 481px) {
+  .tab-bar {
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+  }
+}
+
+.tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tab-pill {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 32px;
+  border-radius: var(--radius-full);
+}
+
+.tab[aria-current='page'] {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+.tab[aria-current='page'] .tab-pill {
+  background: var(--color-main-card);
+  color: var(--color-accent);
 }
