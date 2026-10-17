@@ -452,11 +452,11 @@ button:disabled {
   cursor: pointer;
 }
 
-/* Długie słowo (np. 50 znaków bez spacji) łamie się zamiast wychodzić poza kartę. */
 .item-display--readonly {
   cursor: default;
 }
 
+/* Długie słowo (np. 50 znaków bez spacji) łamie się zamiast wychodzić poza kartę. */
 .item-name {
   min-width: 0;
   overflow-wrap: anywhere;

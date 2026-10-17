@@ -46,6 +46,15 @@ function saveOrRevert() {
   return false;
 }
 
+// Ekran mógł nie zdążyć się odświeżyć po północy (np. karta na komputerze widoczna przez
+// całą noc). Wtedy niczego nie zapisujemy, tylko pokazujemy miesiąc jako zamknięty (SPEC §3.2).
+// Zwraca true, gdy wybrany miesiąc jest już zamknięty.
+function refreshIfClosed() {
+  if (getMonthStatus(state.monthKey, new Date()) !== 'closed') return false;
+  renderAll();
+  return true;
+}
+
 function cloneTemplate(selector) {
   return document.querySelector(selector).content.firstElementChild.cloneNode(true);
 }
@@ -53,12 +62,15 @@ function cloneTemplate(selector) {
 // ---------- Nagłówek i zakładki ----------
 
 function renderHeader(today) {
-  document.querySelector('#month-name').textContent = monthName(state.monthKey);
+  const nameElement = document.querySelector('#month-name');
+  const name = monthName(state.monthKey);
+  // Nagłówek ma aria-live: wpisanie nawet tego samego tekstu czytnik ekranu ogłosiłby ponownie.
+  if (nameElement.textContent !== name) nameElement.textContent = name;
   document.querySelector('#previous-month').disabled = !canGoPrevious(state.monthKey, state.data.months, today);
   document.querySelector('#next-month').disabled = !canGoNext(state.monthKey, today);
 }
 
-function goToMonth(offset) {
+function goToMonth(arrow, otherArrow, offset) {
   // Trwającą edycję zapisujemy w miesiącu, którego dotyczy. Niepoprawną wartość
   // trzeba najpierw poprawić (SPEC §4.3), więc wtedy zostajemy na miejscu.
   if (!itemLists.every((itemList) => itemList.finishEdit())) return;
@@ -67,11 +79,23 @@ function goToMonth(offset) {
   for (const itemList of itemLists) itemList.reset();
   showSliderError(null, null);
   renderAll();
+  // Nieaktywny przycisk traci fokus; przenosimy go na drugą strzałkę, żeby nie zgubił się na stronie.
+  (arrow.disabled ? otherArrow : arrow).focus();
 }
 
 function setUpMonthArrows() {
-  document.querySelector('#previous-month').addEventListener('click', () => goToMonth(-1));
-  document.querySelector('#next-month').addEventListener('click', () => goToMonth(1));
+  const previous = document.querySelector('#previous-month');
+  const next = document.querySelector('#next-month');
+  previous.addEventListener('click', () => goToMonth(previous, next, -1));
+  next.addEventListener('click', () => goToMonth(next, previous, 1));
+  // Jak w handleItemMouseDown: w trakcie edycji wciśnięcie strzałki nie zabiera fokusu z pola.
+  // Inaczej edycję zapisałby handleEditorFocusOut jeszcze przed kliknięciem i goToMonth
+  // nie wiedziałby, że zapis się nie udał.
+  document.querySelector('.month-header').addEventListener('mousedown', (event) => {
+    if (event.target.closest('.icon-button') && itemLists.some((itemList) => itemList.isEditing())) {
+      event.preventDefault();
+    }
+  });
 }
 
 function selectTab(viewName) {
@@ -164,17 +188,18 @@ function showSliderError(slider, message) {
 
 // Podczas przesuwania tylko przeliczamy; zapis jest po puszczeniu suwaka (zdarzenie change).
 function handleSliderInput(event) {
+  if (refreshIfClosed()) return;
   const slider = event.target.dataset.slider;
   const plan = currentPlan();
   const { value, error } = clampSliderValue(plan, slider, Number(event.target.value));
   plan[SLIDER_FIELDS[slider]] = value;
   showSliderError(slider, error);
-  // Suwaki są tylko w bieżącym i następnym miesiącu, więc to nigdy nie jest tryb podglądu.
+  // Zamknięty miesiąc wykluczyło refreshIfClosed, więc to nigdy nie jest tryb podglądu.
   renderPlanView(false);
 }
 
 function handleSliderChange(event) {
-  if (saveOrRevert()) return;
+  if (refreshIfClosed() || saveOrRevert()) return;
   showSliderError(event.target.dataset.slider, MESSAGES.saveFailed);
   renderPlanView(false);
 }
@@ -190,6 +215,7 @@ function setUpSliders() {
 
 // Tworzy plan wybranego miesiąca: kopię najnowszego wcześniejszego planu albo pusty (SPEC §3.3).
 function createPlan(kind, showError) {
+  if (refreshIfClosed()) return;
   const { months } = state.data;
   months[state.monthKey] = kind === 'copy'
     ? copyPlan(months[findCopySource(months, state.monthKey)])
@@ -357,6 +383,7 @@ function createItemList(section) {
 
   function handleSubmit(event) {
     event.preventDefault();
+    if (refreshIfClosed()) return;
     const { name, amount } = form.elements;
     const formError = part('form-error');
     formError.hidden = true;
@@ -407,22 +434,22 @@ function createItemList(section) {
   }
 
   function cancelEdit() {
-    const { id } = editor;
     editor = null;
     render(false);
-    return id;
   }
 
-  // Zwraca id pozycji, gdy edycja się zakończyła, albo null, gdy wartość jest niepoprawna
-  // (wtedy zostaje w polu z komunikatem).
+  // Zwraca 'invalid', gdy wartość jest niepoprawna (edycja zostaje w polu z komunikatem),
+  // 'failed', gdy nie udało się zapisać (komunikat pod pozycją), albo 'done'.
   function saveEdit() {
+    // renderAll w zamkniętym miesiącu kończy edycję bez zapisu.
+    if (refreshIfClosed()) return 'done';
     const { id } = editor;
     const inputs = editorInputs();
     const result = updateItem(currentPlan(), list, id, inputs.name.value, inputs.amount.value);
     for (const field of FIELDS) {
       showFieldError(inputs[field], result.ok ? null : result.errors[field]);
     }
-    if (!result.ok) return null;
+    if (!result.ok) return 'invalid';
 
     const before = findItem(id);
     const after = result.value[list].find((item) => item.id === id);
@@ -430,19 +457,25 @@ function createItemList(section) {
     // Bez zmian nie ma czego zapisywać.
     if (before.name === after.name && before.amount === after.amount) {
       render(false);
-      return id;
+      return 'done';
     }
-    if (!applyPlan(result.value)) showItemError(id, MESSAGES.saveFailed);
-    return id;
+    if (applyPlan(result.value)) return 'done';
+    showItemError(id, MESSAGES.saveFailed);
+    return 'failed';
   }
 
   function handleEditorKeydown(event) {
     if (!editor || !editor.li.contains(event.target)) return;
     if (event.key !== 'Enter' && event.key !== 'Escape') return;
     event.preventDefault();
-    const id = event.key === 'Enter' ? saveEdit() : cancelEdit();
+    const { id } = editor;
+    if (event.key === 'Escape') {
+      cancelEdit();
+    } else if (saveEdit() === 'invalid') {
+      return;
+    }
     // Fokus wraca na pozycję, żeby nie zniknął razem z polami.
-    if (id) focusRow(id);
+    focusRow(id);
   }
 
   // Wyjście z pola zapisuje edycję, ale przejście z „Nazwy” do „Kwoty” nie.
@@ -471,10 +504,11 @@ function createItemList(section) {
   function handleItemClick(event) {
     const button = event.target.closest('[data-action]');
     if (!button) return;
+    if (refreshIfClosed()) return;
     const { id } = button.closest('.item').dataset;
     // Trwającą edycję kończymy tutaj (fokus został w polu, zob. handleItemMouseDown).
     // Niepoprawną wartość trzeba najpierw poprawić (SPEC §4.3).
-    if (editor && saveEdit() === null) return;
+    if (editor && saveEdit() === 'invalid') return;
     if (button.dataset.action === 'edit') startEdit(id);
     if (button.dataset.action === 'remove') handleRemove(id);
   }
@@ -496,8 +530,18 @@ function createItemList(section) {
   // Na ukrytej zakładce może zostać tylko niepoprawna edycja (poprawną zapisało wyjście
   // z pola przy zmianie zakładki). Jej komunikatu nie widać, więc nie blokuje zmiany
   // miesiąca, tylko przepada jak po Escape (zob. reset).
+  // Po nieudanym zapisie też zostajemy, żeby komunikat pod pozycją nie zniknął razem z miesiącem.
   function finishEdit() {
-    return editor === null || section.hidden || saveEdit() !== null;
+    if (editor === null || section.hidden) return true;
+    const { id } = editor;
+    const result = saveEdit();
+    // Pola edycji zniknęły razem z fokusem; wraca on na pozycję z komunikatem.
+    if (result === 'failed') focusRow(id);
+    return result === 'done';
+  }
+
+  function isEditing() {
+    return editor !== null;
   }
 
   function reset() {
@@ -514,7 +558,7 @@ function createItemList(section) {
   itemsElement.addEventListener('keydown', handleEditorKeydown);
   itemsElement.addEventListener('focusout', handleEditorFocusOut);
 
-  return { render, finishEdit, reset };
+  return { render, finishEdit, isEditing, reset };
 }
 
 const noPlanCards = [...document.querySelectorAll('[data-no-plan]')].map(createNoPlanCard);
@@ -536,6 +580,21 @@ function renderAll() {
   for (const itemList of itemLists) itemList.render(readOnly);
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+// Karta widoczna przez całą noc nie dostaje visibilitychange, więc początek miesiąca
+// sprawdza też minutnik. setTimeout nie przyjmuje opóźnień dłuższych niż ok. 24 dni,
+// dlatego czekamy najwyżej dobę naraz. Uśpiony komputer może minutnik opóźnić;
+// wtedy przed zapisem i tak chroni refreshIfClosed.
+function scheduleMonthStart() {
+  const now = new Date();
+  const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  setTimeout(() => {
+    if (new Date() >= nextMonthStart) renderAll();
+    scheduleMonthStart();
+  }, Math.min(nextMonthStart - now, DAY_MS));
+}
+
 setUpTabs();
 setUpMonthArrows();
 setUpSliders();
@@ -543,4 +602,5 @@ setUpSliders();
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) renderAll();
 });
+scheduleMonthStart();
 renderAll();
