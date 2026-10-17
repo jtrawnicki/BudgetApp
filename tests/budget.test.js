@@ -13,6 +13,11 @@ import {
   validatePercents,
   maxSliderValue,
   clampSliderValue,
+  sumAmounts,
+  amountToInputText,
+  addItem,
+  updateItem,
+  removeItem,
   validatePlan,
   validateData,
   monthKeyFromDate,
@@ -246,6 +251,104 @@ describe('clampSliderValue', () => {
   it('gdy drugi suwak ma 100%, ten stoi na 0 z komunikatem o sumie', () => {
     const plan = makePlan({ income: 100000, investment: 100 });
     assert.deepEqual(clampSliderValue(plan, 'savings', 5), { value: 0, error: MESSAGES.percentSumTooHigh });
+  });
+});
+
+describe('sumAmounts i amountToInputText', () => {
+  it('sumuje kwoty listy, pusta lista daje 0', () => {
+    assert.equal(sumAmounts([{ amount: 100 }, { amount: 250 }]), 350);
+    assert.equal(sumAmounts([]), 0);
+  });
+
+  it('kwota do pola edycji: przecinek, bez spacji i bez „zł”', () => {
+    assert.equal(amountToInputText(123450), '1234,50');
+    assert.equal(amountToInputText(5), '0,05');
+    assert.equal(amountToInputText(MAX_AMOUNT), '10000000,00');
+  });
+
+  it('tekst z pola edycji wraca do tej samej kwoty', () => {
+    for (const amount of [1, 99, 100, 123456, MAX_AMOUNT]) {
+      assert.deepEqual(parseAmount(amountToInputText(amount)), { ok: true, value: amount });
+    }
+  });
+});
+
+describe('addItem', () => {
+  it('dodaje pozycję na koniec listy, z nazwą bez spacji na brzegach', () => {
+    const plan = makePlan({ income: 100000 });
+    const result = addItem(plan, 'incomes', 'i2', '  Premia ', '1 234,50');
+    assert.equal(result.ok, true);
+    assert.deepEqual(result.value.incomes.at(-1), { id: 'i2', name: 'Premia', amount: 123450 });
+    assert.equal(result.value.incomes.length, 2);
+  });
+
+  it('nie zmienia przekazanego planu', () => {
+    const plan = makePlan({ income: 100000 });
+    addItem(plan, 'expenses', 'e9', 'Prąd', '100');
+    assert.equal(plan.expenses.length, 0);
+  });
+
+  it('odrzuca pustą nazwę, zbyt długą nazwę i złą kwotę, z komunikatem pod właściwym polem', () => {
+    const plan = makePlan({ income: MAX_AMOUNT });
+    const cases = [
+      ['  ', '10', { name: MESSAGES.nameEmpty, amount: null }],
+      ['a'.repeat(51), '10', { name: MESSAGES.nameTooLong, amount: null }],
+      ['Prąd', '0', { name: null, amount: MESSAGES.amountNotPositive }],
+      ['Prąd', '10 000 000,01', { name: null, amount: MESSAGES.amountTooLarge }],
+      ['Prąd', '1,234', { name: null, amount: MESSAGES.amountTooPrecise }],
+      ['', '', { name: MESSAGES.nameEmpty, amount: MESSAGES.amountInvalid }],
+    ];
+    for (const [name, amount, errors] of cases) {
+      assert.deepEqual(addItem(plan, 'expenses', 'e9', name, amount), { ok: false, errors }, `${name} / ${amount}`);
+    }
+  });
+
+  it('odrzuca wydatek, przez który „Zostało” byłoby ujemne, a przyjmuje dokładnie 0', () => {
+    const plan = makePlan({ income: 100000, savings: 50 });
+    assert.deepEqual(addItem(plan, 'expenses', 'e9', 'Czynsz', '500,01'), {
+      ok: false,
+      errors: { name: null, amount: MESSAGES.remainingNegative },
+    });
+    assert.equal(addItem(plan, 'expenses', 'e9', 'Czynsz', '500').ok, true);
+  });
+});
+
+describe('updateItem', () => {
+  it('zmienia nazwę i kwotę wskazanej pozycji', () => {
+    const plan = makePlan({ income: 100000, expense: 1000 });
+    const result = updateItem(plan, 'expenses', 'e1', ' Najem ', '20,5');
+    assert.deepEqual(result.value.expenses, [{ id: 'e1', name: 'Najem', amount: 2050 }]);
+    assert.equal(plan.expenses[0].name, 'Czynsz');
+  });
+
+  it('odrzuca zmniejszenie przychodu, przez które „Zostało” byłoby ujemne', () => {
+    const plan = makePlan({ income: 100000, expense: 60000 });
+    assert.deepEqual(updateItem(plan, 'incomes', 'i1', 'Pensja', '599,99'), {
+      ok: false,
+      errors: { name: null, amount: MESSAGES.remainingNegative },
+    });
+  });
+
+  it('odrzuca niepoprawne pola', () => {
+    const plan = makePlan({ income: 100000 });
+    assert.deepEqual(updateItem(plan, 'incomes', 'i1', '', '0'), {
+      ok: false,
+      errors: { name: MESSAGES.nameEmpty, amount: MESSAGES.amountNotPositive },
+    });
+  });
+});
+
+describe('removeItem', () => {
+  it('usuwa wskazaną pozycję', () => {
+    const plan = makePlan({ income: 100000, expense: 1000 });
+    const result = removeItem(plan, 'expenses', 'e1');
+    assert.deepEqual(result.value.expenses, []);
+    assert.equal(plan.expenses.length, 1);
+  });
+
+  it('odrzuca usunięcie przychodu, przez które „Zostało” byłoby ujemne', () => {
+    const plan = makePlan({ income: 100000, expense: 1000 });
+    assert.deepEqual(removeItem(plan, 'incomes', 'i1'), { ok: false, error: MESSAGES.remainingNegative });
   });
 });
 
