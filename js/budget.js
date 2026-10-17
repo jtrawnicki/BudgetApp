@@ -44,7 +44,7 @@ export function roundPercentOf(amount, percent) {
   return Math.floor((amount * percent + 50) / 100);
 }
 
-function sumAmounts(items) {
+export function sumAmounts(items) {
   return items.reduce((total, item) => total + item.amount, 0);
 }
 
@@ -117,6 +117,12 @@ export function formatAmount(amount) {
   return `${groupedZloty},${grosze}${NBSP}zł`;
 }
 
+// Kwota do pola edycji, np. "1234,50": bez spacji i bez „zł”, żeby łatwo ją poprawić.
+export function amountToInputText(amount) {
+  const grosze = String(amount % 100).padStart(2, '0');
+  return `${Math.floor(amount / 100)},${grosze}`;
+}
+
 // ---------- Procenty ----------
 
 function isPercent(value) {
@@ -150,6 +156,48 @@ export function clampSliderValue(plan, slider, requested) {
   const otherPercent = plan.savingsPercent + plan.investmentPercent - plan[field];
   const error = max === 100 - otherPercent ? MESSAGES.percentSumTooHigh : MESSAGES.remainingNegative;
   return { value: max, error };
+}
+
+// ---------- Pozycje list (przychody i wydatki) ----------
+// Funkcje nie zmieniają przekazanego planu: zwracają nowy plan albo błędy.
+// Błędy pól są osobne, żeby każdy komunikat pojawił się pod swoim polem.
+
+function fieldErrors(name, amount) {
+  return { ok: false, errors: { name, amount } };
+}
+
+function parseItemFields(nameText, amountText) {
+  const name = normalizeName(nameText);
+  const amount = parseAmount(amountText);
+  if (name.ok && amount.ok) return success({ name: name.value, amount: amount.value });
+  return fieldErrors(name.ok ? null : name.error, amount.ok ? null : amount.error);
+}
+
+// Ujemne „Zostało” wynika z kwoty, dlatego komunikat jest pod polem kwoty.
+function acceptIfRemainingValid(nextPlan) {
+  if (calculateSummary(nextPlan).remaining < 0) return fieldErrors(null, MESSAGES.remainingNegative);
+  return success(nextPlan);
+}
+
+// list to 'incomes' albo 'expenses'.
+export function addItem(plan, list, id, nameText, amountText) {
+  const fields = parseItemFields(nameText, amountText);
+  if (!fields.ok) return fields;
+  return acceptIfRemainingValid({ ...plan, [list]: [...plan[list], { id, ...fields.value }] });
+}
+
+export function updateItem(plan, list, id, nameText, amountText) {
+  const fields = parseItemFields(nameText, amountText);
+  if (!fields.ok) return fields;
+  const items = plan[list].map((item) => (item.id === id ? { id, ...fields.value } : item));
+  return acceptIfRemainingValid({ ...plan, [list]: items });
+}
+
+// Usunięcie przychodu może sprawić, że „Zostało” byłoby ujemne (SPEC §3.4, reguła 2).
+export function removeItem(plan, list, id) {
+  const nextPlan = { ...plan, [list]: plan[list].filter((item) => item.id !== id) };
+  if (calculateSummary(nextPlan).remaining < 0) return failure(MESSAGES.remainingNegative);
+  return success(nextPlan);
 }
 
 // ---------- Walidacja ----------

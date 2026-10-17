@@ -220,8 +220,10 @@ button:disabled {
   box-shadow: 0 0 0 1px var(--color-accent);
 }
 
-.field-input[aria-invalid='true'] {
+.field-input[aria-invalid='true'],
+.field-input[aria-invalid='true']:focus {
   border-color: var(--color-error);
+  box-shadow: 0 0 0 1px var(--color-error);
 }
 
 .field-error {
@@ -358,6 +360,91 @@ button:disabled {
   border: var(--thumb-ring) solid var(--color-accent);
   border-radius: 50%;
   background: var(--color-card);
+}
+
+/* ---------- Ekrany Przychody i Wydatki ---------- */
+
+.list-content {
+  display: grid;
+  gap: 16px;
+}
+
+.item-form {
+  display: grid;
+  gap: 12px;
+}
+
+.item-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item + .item {
+  border-top: 1px solid var(--color-slider-track);
+}
+
+.item-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Cała pozycja to przycisk: da się ją dotknąć i wybrać klawiaturą. */
+.item-display {
+  display: flex;
+  flex: 1;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  /* Bez min-width: 0 długa nazwa rozepchnęłaby wiersz i wymusiła poziome przewijanie. */
+  min-width: 0;
+  min-height: 48px;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* Długie słowo (np. 50 znaków bez spacji) łamie się zamiast wychodzić poza kartę. */
+.item-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.item-amount {
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.item-error {
+  padding-bottom: 8px;
+}
+
+.item-editor {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+}
+
+.list-empty {
+  padding: 8px 0;
+  color: var(--color-text-secondary);
+}
+
+.list-total {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-field-border);
+  font-weight: 600;
+}
+
+.list-total-amount {
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Pasek zakładek ---------- */

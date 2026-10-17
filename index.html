@@ -68,17 +68,76 @@
         </div>
       </section>
 
-      <section class="view" id="view-incomes" aria-labelledby="view-incomes-title" hidden>
+      <!-- Przychody i Wydatki mają ten sam układ; obsługuje je jeden komponent listy w app.js. -->
+      <section class="view" id="view-incomes" data-list="incomes" aria-labelledby="view-incomes-title" hidden>
         <h2 class="view-title" id="view-incomes-title">Przychody</h2>
-        <div class="card">
+        <!-- Widoczne, gdy miesiąc nie ma planu. Tworzenie planu to zadanie Z7. -->
+        <div class="card" data-part="no-plan">
           <p>Ten ekran pojawi się wkrótce.</p>
+        </div>
+
+        <div class="list-content" data-part="content" hidden>
+          <form class="card item-form" data-part="form" novalidate>
+            <div class="field">
+              <label class="field-label" for="incomes-name">Nazwa</label>
+              <input class="field-input" id="incomes-name" name="name" type="text"
+                autocomplete="off" aria-describedby="incomes-name-error">
+              <p class="field-error" id="incomes-name-error" hidden></p>
+            </div>
+            <div class="field">
+              <label class="field-label" for="incomes-amount">Kwota</label>
+              <input class="field-input" id="incomes-amount" name="amount" type="text"
+                inputmode="decimal" autocomplete="off" aria-describedby="incomes-amount-error">
+              <p class="field-error" id="incomes-amount-error" hidden></p>
+            </div>
+            <button type="submit" class="button button--primary">Dodaj</button>
+            <p class="field-error" data-part="form-error" role="alert" hidden></p>
+          </form>
+
+          <div class="card">
+            <ul class="item-list" data-part="items"></ul>
+            <p class="list-empty" data-part="empty">Brak pozycji</p>
+            <p class="list-total">
+              <span>Razem</span>
+              <span class="list-total-amount" data-part="total"></span>
+            </p>
+          </div>
         </div>
       </section>
 
-      <section class="view" id="view-expenses" aria-labelledby="view-expenses-title" hidden>
+      <section class="view" id="view-expenses" data-list="expenses" aria-labelledby="view-expenses-title" hidden>
         <h2 class="view-title" id="view-expenses-title">Wydatki</h2>
-        <div class="card">
+        <!-- Widoczne, gdy miesiąc nie ma planu. Tworzenie planu to zadanie Z7. -->
+        <div class="card" data-part="no-plan">
           <p>Ten ekran pojawi się wkrótce.</p>
+        </div>
+
+        <div class="list-content" data-part="content" hidden>
+          <form class="card item-form" data-part="form" novalidate>
+            <div class="field">
+              <label class="field-label" for="expenses-name">Nazwa</label>
+              <input class="field-input" id="expenses-name" name="name" type="text"
+                autocomplete="off" aria-describedby="expenses-name-error">
+              <p class="field-error" id="expenses-name-error" hidden></p>
+            </div>
+            <div class="field">
+              <label class="field-label" for="expenses-amount">Kwota</label>
+              <input class="field-input" id="expenses-amount" name="amount" type="text"
+                inputmode="decimal" autocomplete="off" aria-describedby="expenses-amount-error">
+              <p class="field-error" id="expenses-amount-error" hidden></p>
+            </div>
+            <button type="submit" class="button button--primary">Dodaj</button>
+            <p class="field-error" data-part="form-error" role="alert" hidden></p>
+          </form>
+
+          <div class="card">
+            <ul class="item-list" data-part="items"></ul>
+            <p class="list-empty" data-part="empty">Brak pozycji</p>
+            <p class="list-total">
+              <span>Razem</span>
+              <span class="list-total-amount" data-part="total"></span>
+            </p>
+          </div>
         </div>
       </section>
 
@@ -89,6 +148,39 @@
         </div>
       </section>
     </main>
+
+    <!-- Szablony pozycji listy; app.js je kopiuje i wpisuje tekst przez textContent. -->
+    <template id="item-template">
+      <li class="item">
+        <div class="item-row">
+          <button type="button" class="item-display" data-action="edit">
+            <span class="item-name"></span>
+            <span class="item-amount"></span>
+          </button>
+          <button type="button" class="icon-button" data-action="remove">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></svg>
+          </button>
+        </div>
+        <p class="field-error item-error" role="alert" hidden></p>
+      </li>
+    </template>
+
+    <template id="item-editor-template">
+      <li class="item item--editing">
+        <div class="item-editor">
+          <div class="field">
+            <label class="field-label" data-field="name">Nazwa</label>
+            <input class="field-input" data-field="name" type="text" autocomplete="off" enterkeyhint="done">
+            <p class="field-error" data-field="name" hidden></p>
+          </div>
+          <div class="field">
+            <label class="field-label" data-field="amount">Kwota</label>
+            <input class="field-input" data-field="amount" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done">
+            <p class="field-error" data-field="amount" hidden></p>
+          </div>
+        </div>
+      </li>
+    </template>
 
     <nav class="tab-bar" aria-label="Zakładki">
       <button type="button" class="tab" data-view="plan" aria-current="page">
