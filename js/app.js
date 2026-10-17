@@ -380,12 +380,19 @@ function createItemList(section) {
     const button = event.target.closest('[data-action]');
     if (!button) return;
     const { id } = button.closest('.item').dataset;
-    // Na telefonie kliknięcie przychodzi tuż po focusout, zanim zapis z handleEditorFocusOut
-    // zdąży się wykonać, więc trwającą edycję kończymy tutaj. Niepoprawną wartość trzeba
-    // najpierw poprawić (SPEC §4.3).
+    // Trwającą edycję kończymy tutaj (fokus został w polu, zob. handleItemMouseDown).
+    // Niepoprawną wartość trzeba najpierw poprawić (SPEC §4.3).
     if (editor && saveEdit() === null) return;
     if (button.dataset.action === 'edit') startEdit(id);
     if (button.dataset.action === 'remove') handleRemove(id);
+  }
+
+  // Fokus przechodzi na przycisk już przy wciśnięciu, a click przychodzi dopiero po puszczeniu.
+  // Zapis z handleEditorFocusOut zdążyłby się wykonać w międzyczasie: edytor zamieniłby się
+  // w niższy wiersz, pozycje poniżej przesunęłyby się w górę i kliknięcie by przepadło.
+  // Dlatego w trakcie edycji wciśnięcie przycisku pozycji nie zabiera fokusu z pola.
+  function handleItemMouseDown(event) {
+    if (editor && event.target.closest('[data-action]')) event.preventDefault();
   }
 
   // Wpisywanie w pole chowa jego komunikat; przy zapisie sprawdzamy wartość od nowa.
@@ -395,6 +402,7 @@ function createItemList(section) {
 
   form.addEventListener('submit', handleSubmit);
   section.addEventListener('input', handleInput);
+  itemsElement.addEventListener('mousedown', handleItemMouseDown);
   itemsElement.addEventListener('click', handleItemClick);
   itemsElement.addEventListener('keydown', handleEditorKeydown);
   itemsElement.addEventListener('focusout', handleEditorFocusOut);
