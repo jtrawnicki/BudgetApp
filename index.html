@@ -14,23 +14,24 @@
 <body>
   <div class="app">
     <header class="month-header">
-      <!-- Strzałki są nieaktywne do czasu zadania Z7 (przełączanie miesięcy). -->
-      <button type="button" class="icon-button" id="previous-month" aria-label="Poprzedni miesiąc" disabled>
+      <button type="button" class="icon-button" id="previous-month" aria-label="Poprzedni miesiąc">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
       </button>
-      <h1 class="month-name" id="month-name"></h1>
-      <button type="button" class="icon-button" id="next-month" aria-label="Następny miesiąc" disabled>
+      <!-- aria-live: czytnik ekranu przeczyta nową nazwę po przełączeniu miesiąca. -->
+      <h1 class="month-name" id="month-name" aria-live="polite"></h1>
+      <button type="button" class="icon-button" id="next-month" aria-label="Następny miesiąc">
         <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
       </button>
     </header>
 
     <main>
       <section class="view" id="view-plan" aria-labelledby="view-plan-title">
-        <h2 class="view-title" id="view-plan-title">Plan</h2>
-        <!-- Widoczne, gdy miesiąc nie ma planu. Tworzenie planu to zadanie Z7. -->
-        <div class="card card--main" id="plan-empty">
-          <p>Ten ekran pojawi się wkrótce.</p>
+        <div class="view-header">
+          <h2 class="view-title" id="view-plan-title" tabindex="-1">Plan</h2>
+          <span class="badge" id="closed-badge" hidden>Zamknięty</span>
         </div>
+        <!-- Miesiąc bez planu: app.js wstawia tu kartę z szablonu #no-plan-template. -->
+        <div data-no-plan></div>
 
         <div class="plan-content" id="plan-content" hidden>
           <div class="card card--main">
@@ -70,11 +71,8 @@
 
       <!-- Przychody i Wydatki mają ten sam układ; obsługuje je jeden komponent listy w app.js. -->
       <section class="view" id="view-incomes" data-list="incomes" aria-labelledby="view-incomes-title" hidden>
-        <h2 class="view-title" id="view-incomes-title">Przychody</h2>
-        <!-- Widoczne, gdy miesiąc nie ma planu. Tworzenie planu to zadanie Z7. -->
-        <div class="card" data-part="no-plan">
-          <p>Ten ekran pojawi się wkrótce.</p>
-        </div>
+        <h2 class="view-title" id="view-incomes-title" tabindex="-1">Przychody</h2>
+        <div data-no-plan></div>
 
         <div class="list-content" data-part="content" hidden>
           <form class="card item-form" data-part="form" novalidate>
@@ -106,11 +104,8 @@
       </section>
 
       <section class="view" id="view-expenses" data-list="expenses" aria-labelledby="view-expenses-title" hidden>
-        <h2 class="view-title" id="view-expenses-title">Wydatki</h2>
-        <!-- Widoczne, gdy miesiąc nie ma planu. Tworzenie planu to zadanie Z7. -->
-        <div class="card" data-part="no-plan">
-          <p>Ten ekran pojawi się wkrótce.</p>
-        </div>
+        <h2 class="view-title" id="view-expenses-title" tabindex="-1">Wydatki</h2>
+        <div data-no-plan></div>
 
         <div class="list-content" data-part="content" hidden>
           <form class="card item-form" data-part="form" novalidate>
@@ -180,6 +175,32 @@
           </div>
         </div>
       </li>
+    </template>
+
+    <!-- Pozycja zamkniętego miesiąca: sam tekst, bez edycji i kosza. -->
+    <template id="item-readonly-template">
+      <li class="item">
+        <div class="item-display item-display--readonly">
+          <span class="item-name"></span>
+          <span class="item-amount"></span>
+        </div>
+      </li>
+    </template>
+
+    <!-- Karta miesiąca bez planu, wspólna dla zakładek Plan, Przychody i Wydatki.
+         Miesiąc zamknięty pokazuje tylko napis „Brak planu”. -->
+    <template id="no-plan-template">
+      <div class="card card--main">
+        <div class="plan-start" data-part="start">
+          <h3 class="plan-start-title" data-part="title"></h3>
+          <div class="plan-start-actions">
+            <button type="button" class="button button--primary" data-create="copy"></button>
+            <button type="button" class="button button--secondary" data-create="empty">Zacznij od zera</button>
+          </div>
+          <p class="field-error" data-part="error" role="alert" hidden></p>
+        </div>
+        <p data-part="closed">Brak planu</p>
+      </div>
     </template>
 
     <nav class="tab-bar" aria-label="Zakładki">
