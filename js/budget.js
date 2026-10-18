@@ -137,12 +137,17 @@ export function validatePercents(savingsPercent, investmentPercent) {
   return null;
 }
 
+// Najwyższa wartość suwaka, na którą pozwala sama reguła „suma % najwyżej 100”.
+function percentSumLimit(plan, slider) {
+  const otherPercent = plan.savingsPercent + plan.investmentPercent - plan[SLIDER_FIELDS[slider]];
+  return 100 - otherPercent;
+}
+
 // Najwyższa wartość suwaka ('savings' albo 'investment'), przy której suma %
 // nie przekracza 100, a „Zostało” nie jest ujemne.
 export function maxSliderValue(plan, slider) {
   const field = SLIDER_FIELDS[slider];
-  const otherPercent = plan.savingsPercent + plan.investmentPercent - plan[field];
-  for (let percent = 100 - otherPercent; percent > 0; percent--) {
+  for (let percent = percentSumLimit(plan, slider); percent > 0; percent--) {
     if (calculateSummary({ ...plan, [field]: percent }).remaining >= 0) return percent;
   }
   return 0;
@@ -154,9 +159,7 @@ export function clampSliderValue(plan, slider, requested) {
   const max = maxSliderValue(plan, slider);
   if (requested <= max) return { value: requested, error: null };
 
-  const field = SLIDER_FIELDS[slider];
-  const otherPercent = plan.savingsPercent + plan.investmentPercent - plan[field];
-  const error = max === 100 - otherPercent ? MESSAGES.percentSumTooHigh : MESSAGES.remainingNegative;
+  const error = max === percentSumLimit(plan, slider) ? MESSAGES.percentSumTooHigh : MESSAGES.remainingNegative;
   return { value: max, error };
 }
 
