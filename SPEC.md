@@ -193,15 +193,15 @@ Oba ekrany są zbudowane tak samo:
 ---
 
 ## 6. Kryteria ukończenia wersji 1
-- [ ] Tworzę plan bieżącego miesiąca od zera i widzę poprawną kwotę „Zostało”.
-- [ ] Zmiana suwaków od razu przelicza kwoty i pasek podziału.
-- [ ] Nie da się zapisać zmiany, przez którą „Zostało” byłoby ujemne albo suma % przekroczyłaby 100%.
-- [ ] Tworzę plan następnego miesiąca przez kopiowanie i mogę edytować każde pole.
-- [ ] Poprzedni miesiąc jest tylko do odczytu, a pominięty miesiąc pokazuje „Brak planu”.
-- [ ] Dane przetrwają zamknięcie i ponowne otwarcie aplikacji.
-- [ ] Eksport tworzy plik, a import go wczytuje i zastępuje dane.
-- [ ] Aplikację można zainstalować na telefonie i działa bez internetu.
-- [ ] Aplikacja jest dostępna w internecie i otwiera się na telefonie.
+- [x] Tworzę plan bieżącego miesiąca od zera i widzę poprawną kwotę „Zostało”.
+- [x] Zmiana suwaków od razu przelicza kwoty i pasek podziału.
+- [x] Nie da się zapisać zmiany, przez którą „Zostało” byłoby ujemne albo suma % przekroczyłaby 100%.
+- [x] Tworzę plan następnego miesiąca przez kopiowanie i mogę edytować każde pole.
+- [x] Poprzedni miesiąc jest tylko do odczytu, a pominięty miesiąc pokazuje „Brak planu”.
+- [x] Dane przetrwają zamknięcie i ponowne otwarcie aplikacji.
+- [x] Eksport tworzy plik, a import go wczytuje i zastępuje dane.
+- [x] Aplikację można zainstalować na telefonie i działa bez internetu.
+- [x] Aplikacja jest dostępna w internecie i otwiera się na telefonie.
 
 ---
 

@@ -87,6 +87,6 @@ Plan pracy i postęp prowadzimy na GitHubie: etapy to [kamienie milowe](https://
 ---
 
 ## 5. Techniczne kryteria ukończenia
-- [ ] Wszystkie testy `node --test` przechodzą.
-- [ ] Aplikacja jest opublikowana na GitHub Pages.
-- [ ] Service worker pozwala uruchomić aplikację bez internetu.
+- [x] Wszystkie testy `node --test` przechodzą.
+- [x] Aplikacja jest opublikowana na GitHub Pages.
+- [x] Service worker pozwala uruchomić aplikację bez internetu.
