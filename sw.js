@@ -3,7 +3,7 @@
 // Podnoś numer przy każdej zmianie plików aplikacji (AGENTS §6). Nowa nazwa
 // to nowy cache, a stary zostaje usunięty w „activate”. Bez tego telefon
 // dalej pokazywałby starą wersję.
-const CACHE_NAME = 'budgetapp-v1';
+const CACHE_NAME = 'budgetapp-v2';
 
 // Ścieżki względne: na GitHub Pages aplikacja działa pod /BudgetApp/.
 const APP_FILES = [

@@ -2,9 +2,15 @@
   <!-- Tło bez zaokrągleń: telefon sam przycina ikonę do koła lub zaokrąglonego kwadratu.
        Rysunek mieści się w środkowym kole (promień 40%), żeby nic nie zostało ucięte. -->
   <rect width="512" height="512" fill="#D3EBDC"/>
-  <!-- Pasek podziału z karty głównej ekranu Plan (SPEC §5): oszczędności, inwestycje, wydatki, zostało. -->
-  <rect x="72" y="224" width="120" height="64" rx="32" fill="#1B6B4A"/>
-  <rect x="208" y="224" width="72" height="64" rx="32" fill="#52A57D"/>
-  <rect x="296" y="224" width="64" height="64" rx="32" fill="#9CCFB2"/>
-  <rect x="376" y="224" width="64" height="64" rx="32" fill="#FFFFFF"/>
+  <!-- Skarbonka z wpadającą monetą (kolory z SPEC §5). Bez drobnych detali,
+       bo ikona musi być czytelna także w rozmiarze ok. 30 px. -->
+  <circle cx="240" cy="128" r="46" fill="#52A57D"/>
+  <circle cx="240" cy="128" r="22" fill="none" stroke="#D3EBDC" stroke-width="11"/>
+  <path d="M300 196 L340 140 L370 206 Z" fill="#1B6B4A" stroke="#1B6B4A" stroke-width="12" stroke-linejoin="round"/>
+  <rect x="160" y="340" width="50" height="74" rx="18" fill="#1B6B4A"/>
+  <rect x="284" y="340" width="50" height="74" rx="18" fill="#1B6B4A"/>
+  <ellipse cx="244" cy="290" rx="150" ry="116" fill="#1B6B4A"/>
+  <rect x="372" y="254" width="60" height="68" rx="24" fill="#1B6B4A"/>
+  <circle cx="334" cy="258" r="14" fill="#FFFFFF"/>
+  <rect x="196" y="198" width="88" height="20" rx="10" fill="#D3EBDC"/>
 </svg>
