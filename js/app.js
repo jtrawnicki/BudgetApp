@@ -52,12 +52,21 @@ function saveOrRevert() {
 // Zwraca true, gdy wybrany miesiąc jest już zamknięty.
 function refreshIfClosed() {
   if (getMonthStatus(state.monthKey, new Date()) !== 'closed') return false;
+  // Przesuwany suwak zmienia dane w pamięci przed zapisem; zamknięty miesiąc
+  // ma zostać taki, jak zapisany, żeby ta zmiana nie trafiła później do zapisu.
+  state.data = structuredClone(state.savedData);
   renderAll();
   return true;
 }
 
 function cloneTemplate(selector) {
   return document.querySelector(selector).content.firstElementChild.cloneNode(true);
+}
+
+// Pokazuje komunikat w elemencie; null ukrywa element razem z poprzednim tekstem.
+function setMessage(element, message) {
+  element.hidden = message === null;
+  element.textContent = message ?? '';
 }
 
 // ---------- Nagłówek i zakładki ----------
@@ -179,10 +188,7 @@ function renderPlanView(readOnly) {
 // Na ekranie jest najwyżej jeden komunikat suwaka: ten, którego dotyczy ostatnia zmiana.
 function showSliderError(slider, message) {
   for (const name of Object.keys(SLIDER_FIELDS)) {
-    const error = document.querySelector(`#${name}-error`);
-    const visible = name === slider && message !== null;
-    error.hidden = !visible;
-    error.textContent = visible ? message : '';
+    setMessage(document.querySelector(`#${name}-error`), name === slider ? message : null);
   }
 }
 
@@ -199,7 +205,8 @@ function handleSliderInput(event) {
 }
 
 function handleSliderChange(event) {
-  if (refreshIfClosed() || saveOrRevert()) return;
+  if (refreshIfClosed()) return;
+  if (saveOrRevert()) return;
   showSliderError(event.target.dataset.slider, MESSAGES.saveFailed);
   renderPlanView(false);
 }
@@ -236,16 +243,12 @@ function createNoPlanCard(container) {
   const part = (name) => card.querySelector(`[data-part="${name}"]`);
   const copyButton = card.querySelector('[data-create="copy"]');
   const error = part('error');
+  const showError = (message) => setMessage(error, message);
   container.append(card);
-
-  function showError(message) {
-    error.hidden = false;
-    error.textContent = message;
-  }
 
   function render(readOnly) {
     container.hidden = currentPlan() !== null;
-    error.hidden = true;
+    showError(null);
     part('start').hidden = readOnly;
     part('closed').hidden = !readOnly;
     part('title').textContent = `Zaplanuj: ${monthName(state.monthKey)}`;
@@ -270,9 +273,7 @@ const FIELDS = ['name', 'amount'];
 // Komunikat trafia do elementu wskazanego przez aria-describedby pola,
 // dzięki czemu czytnik ekranu przeczyta go razem z polem.
 function showFieldError(input, message) {
-  const error = document.getElementById(input.getAttribute('aria-describedby'));
-  error.hidden = message === null;
-  error.textContent = message ?? '';
+  setMessage(document.getElementById(input.getAttribute('aria-describedby')), message);
   if (message === null) {
     input.removeAttribute('aria-invalid');
   } else {
@@ -333,7 +334,7 @@ function createItemList(section) {
     if (readOnly) return cachedRow(readOnlyRowsByItem, item, createReadOnlyRow);
     if (editor?.id === item.id) return editor.li;
     const li = cachedRow(rowsByItem, item, createRow);
-    li.querySelector('.item-error').hidden = true;
+    setMessage(li.querySelector('.item-error'), null);
     return li;
   }
 
@@ -361,9 +362,7 @@ function createItemList(section) {
 
   // Komunikat pod pozycją na liście (np. odrzucone usunięcie, SPEC §3.4).
   function showItemError(id, message) {
-    const error = findRow(id).querySelector('.item-error');
-    error.hidden = false;
-    error.textContent = message;
+    setMessage(findRow(id).querySelector('.item-error'), message);
   }
 
   function focusRow(id) {
@@ -386,7 +385,7 @@ function createItemList(section) {
     if (refreshIfClosed()) return;
     const { name, amount } = form.elements;
     const formError = part('form-error');
-    formError.hidden = true;
+    setMessage(formError, null);
 
     const result = addItem(currentPlan(), list, crypto.randomUUID(), name.value, amount.value);
     showFieldError(name, result.ok ? null : result.errors.name);
@@ -394,8 +393,7 @@ function createItemList(section) {
     if (!result.ok) return;
 
     if (!applyPlan(result.value)) {
-      formError.hidden = false;
-      formError.textContent = MESSAGES.saveFailed;
+      setMessage(formError, MESSAGES.saveFailed);
       return;
     }
     form.reset();
@@ -548,7 +546,7 @@ function createItemList(section) {
     editor = null;
     form.reset();
     for (const input of form.querySelectorAll('.field-input')) showFieldError(input, null);
-    part('form-error').hidden = true;
+    setMessage(part('form-error'), null);
   }
 
   form.addEventListener('submit', handleSubmit);
@@ -607,15 +605,13 @@ function setUpConfirmDialog() {
 
 // ---------- Ekran Więcej ----------
 
-function showMessage(selector, message) {
-  const element = document.querySelector(selector);
-  element.hidden = message === null;
-  element.textContent = message ?? '';
+function showBackupMessages(error, status) {
+  setMessage(document.querySelector('#backup-error'), error);
+  setMessage(document.querySelector('#backup-status'), status);
 }
 
-function showBackupMessages(error, status) {
-  showMessage('#backup-error', error);
-  showMessage('#backup-status', status);
+function showDeletePlanError(message) {
+  setMessage(document.querySelector('#delete-plan-error'), message);
 }
 
 // Komunikaty i otwarte edycje dotyczą wybranego miesiąca; po jego zmianie albo
@@ -623,7 +619,7 @@ function showBackupMessages(error, status) {
 function resetMonthMessages() {
   for (const itemList of itemLists) itemList.reset();
   showSliderError(null, null);
-  showMessage('#delete-plan-error', null);
+  showDeletePlanError(null);
 }
 
 // Odnośnik do pliku w pamięci przeglądarki: plik powstaje na urządzeniu i nigdzie nie jest wysyłany.
@@ -697,7 +693,7 @@ function renderMoreView(today) {
 }
 
 async function handleDeletePlan() {
-  showMessage('#delete-plan-error', null);
+  showDeletePlanError(null);
   const key = state.monthKey;
   const confirmed = await confirmAction({
     title: `Usunąć plan: ${monthName(key)}?`,
@@ -715,7 +711,7 @@ async function handleDeletePlan() {
   resetMonthMessages();
   renderAll();
   if (!saved) {
-    showMessage('#delete-plan-error', MESSAGES.saveFailed);
+    showDeletePlanError(MESSAGES.saveFailed);
     return;
   }
   // Przycisk stał się nieaktywny i stracił fokus; przenosimy go na tytuł ekranu.
