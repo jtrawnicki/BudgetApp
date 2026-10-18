@@ -742,6 +742,13 @@ function renderAll() {
   renderMoreView(today);
 }
 
+// Bez service workera aplikacja działa normalnie, tylko nie offline — stąd sprawdzenie.
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js');
+  }
+}
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Karta widoczna przez całą noc nie dostaje visibilitychange, więc początek miesiąca
@@ -768,3 +775,4 @@ document.addEventListener('visibilitychange', () => {
 });
 scheduleMonthStart();
 renderAll();
+registerServiceWorker();

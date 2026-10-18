@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Tło bez zaokrągleń: telefon sam przycina ikonę do koła lub zaokrąglonego kwadratu.
+       Rysunek mieści się w środkowym kole (promień 40%), żeby nic nie zostało ucięte. -->
+  <rect width="512" height="512" fill="#D3EBDC"/>
+  <!-- Pasek podziału z karty głównej ekranu Plan (SPEC §5): oszczędności, inwestycje, wydatki, zostało. -->
+  <rect x="72" y="224" width="120" height="64" rx="32" fill="#1B6B4A"/>
+  <rect x="208" y="224" width="72" height="64" rx="32" fill="#52A57D"/>
+  <rect x="296" y="224" width="64" height="64" rx="32" fill="#9CCFB2"/>
+  <rect x="376" y="224" width="64" height="64" rx="32" fill="#FFFFFF"/>
+</svg>
