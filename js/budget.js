@@ -18,6 +18,8 @@ export const MESSAGES = Object.freeze({
   remainingNegative: 'Ta zmiana sprawiłaby, że „Zostało” byłoby ujemne.',
   importInvalid: 'To nie jest poprawna kopia danych BudgetApp.',
   saveFailed: 'Nie udało się zapisać zmiany. Przeglądarka nie pozwala zapisywać danych na tym urządzeniu.',
+  importSaveFailed: 'Nie udało się zapisać danych z pliku. Obecne dane nie zostały zmienione.',
+  importDone: 'Dane zostały wczytane.',
 });
 
 // Spacja nierozdzielająca: kwota nie rozbije się na dwie linie.
@@ -251,6 +253,19 @@ export function validateData(data) {
   return valid ? null : MESSAGES.importInvalid;
 }
 
+// Zamienia tekst (zapis z localStorage albo plik kopii) na sprawdzone dane.
+// Tekst, który nie jest nawet poprawnym JSON-em, też jest po prostu niepoprawną kopią.
+export function parseData(text) {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    return failure(MESSAGES.importInvalid);
+  }
+  const error = validateData(data);
+  return error ? failure(error) : success(data);
+}
+
 // ---------- Miesiące ----------
 // Klucz miesiąca ma postać "RRRR-MM", więc klucze można porównywać jak tekst.
 
@@ -319,4 +334,11 @@ export function copyPlan(plan) {
 
 export function createEmptyPlan() {
   return { savingsPercent: 0, investmentPercent: 0, incomes: [], expenses: [] };
+}
+
+// Usunąć można tylko istniejący plan bieżącego albo następnego miesiąca (SPEC §4.4):
+// zamknięte miesiące są tylko do odczytu.
+export function canDeletePlan(key, months, today) {
+  const status = getMonthStatus(key, today);
+  return (status === 'current' || status === 'next') && Object.hasOwn(months, key);
 }

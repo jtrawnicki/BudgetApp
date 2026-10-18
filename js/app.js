@@ -7,6 +7,7 @@ import {
   addMonths,
   amountToInputText,
   calculateSummary,
+  canDeletePlan,
   canGoNext,
   canGoPrevious,
   clampSliderValue,
@@ -21,7 +22,7 @@ import {
   sumAmounts,
   updateItem,
 } from './budget.js';
-import { loadData, saveData } from './storage.js';
+import { buildExportFile, loadData, readImportFile, saveData } from './storage.js';
 
 const initialData = loadData();
 
@@ -76,8 +77,7 @@ function goToMonth(arrow, otherArrow, offset) {
   if (!itemLists.every((itemList) => itemList.finishEdit())) return;
   state.monthKey = addMonths(state.monthKey, offset);
   // Komunikaty i niedokończony formularz dotyczyły poprzedniego miesiąca.
-  for (const itemList of itemLists) itemList.reset();
-  showSliderError(null, null);
+  resetMonthMessages();
   renderAll();
   // Nieaktywny przycisk traci fokus; przenosimy go na drugą strzałkę, żeby nie zgubił się na stronie.
   (arrow.disabled ? otherArrow : arrow).focus();
@@ -564,6 +564,171 @@ function createItemList(section) {
 const noPlanCards = [...document.querySelectorAll('[data-no-plan]')].map(createNoPlanCard);
 const itemLists = [...document.querySelectorAll('[data-list]')].map(createItemList);
 
+// ---------- Okno potwierdzenia ----------
+
+// Funkcja, która przekazuje decyzję z otwartego okna, albo null, gdy okno nie czeka na decyzję.
+let resolveConfirm = null;
+
+function finishConfirm(confirmed) {
+  const resolve = resolveConfirm;
+  resolveConfirm = null;
+  resolve?.(confirmed);
+}
+
+// Pokazuje wspólne okno potwierdzenia i czeka na decyzję. Zwraca true tylko po wybraniu
+// przycisku skutku; „Anuluj”, Escape i zamknięcie okna w inny sposób dają false.
+function confirmAction({ title, text, confirmLabel }) {
+  // Pytanie, na które nikt nie odpowiedział, nie może „zatwierdzić się” później.
+  finishConfirm(false);
+  document.querySelector('#confirm-title').textContent = title;
+  document.querySelector('#confirm-text').textContent = text;
+  document.querySelector('#confirm-button').textContent = confirmLabel;
+  document.querySelector('#confirm-dialog').showModal();
+  return new Promise((resolve) => {
+    resolveConfirm = resolve;
+  });
+}
+
+// Decyzję bierzemy z kliknięcia przycisku (submit przychodzi od razu i wiadomo, który
+// przycisk wybrano), a nie ze zdarzenia close: przeglądarka wysyła je z opóźnieniem,
+// a w testach zdarzało się, że przyszło dopiero przy następnym kliknięciu na stronie
+// i rozstrzygało wtedy niewłaściwe pytanie.
+function setUpConfirmDialog() {
+  const dialog = document.querySelector('#confirm-dialog');
+  dialog.querySelector('form').addEventListener('submit', (event) => {
+    // Okno zamykamy sami, zanim przekażemy decyzję: zamknięcie oddaje fokus
+    // na przycisk, który je otworzył, a skutek decyzji może ten fokus jeszcze przenieść.
+    event.preventDefault();
+    dialog.close();
+    finishConfirm(event.submitter?.value === 'confirm');
+  });
+  dialog.addEventListener('cancel', () => finishConfirm(false));
+}
+
+// ---------- Ekran Więcej ----------
+
+function showMessage(selector, message) {
+  const element = document.querySelector(selector);
+  element.hidden = message === null;
+  element.textContent = message ?? '';
+}
+
+function showBackupMessages(error, status) {
+  showMessage('#backup-error', error);
+  showMessage('#backup-status', status);
+}
+
+// Komunikaty i otwarte edycje dotyczą wybranego miesiąca; po jego zmianie albo
+// podmianie danych byłyby nieaktualne.
+function resetMonthMessages() {
+  for (const itemList of itemLists) itemList.reset();
+  showSliderError(null, null);
+  showMessage('#delete-plan-error', null);
+}
+
+// Odnośnik do pliku w pamięci przeglądarki: plik powstaje na urządzeniu i nigdzie nie jest wysyłany.
+function handleExport() {
+  showBackupMessages(null, null);
+  const { fileName, content } = buildExportFile(state.data, new Date());
+  const url = URL.createObjectURL(new Blob([content], { type: 'application/json' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  // Pobieranie startuje w tle; zbyt wczesne zwolnienie odnośnika potrafi je przerwać (np. w Firefoksie).
+  setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
+
+function handleImportClick() {
+  showBackupMessages(null, null);
+  const input = document.querySelector('#import-file');
+  // Bez wyczyszczenia ponowny wybór tego samego pliku nie wywołałby zdarzenia change.
+  input.value = '';
+  input.click();
+}
+
+async function readFileText(file) {
+  try {
+    return await file.text();
+  } catch {
+    return null;
+  }
+}
+
+// Najpierw sprawdzamy plik, potem pytamy: błędny plik nie wymaga potwierdzenia,
+// bo i tak niczego nie zmieni (SPEC §4.4).
+async function handleImportFile(event) {
+  const [file] = event.target.files;
+  if (!file) return;
+  const text = await readFileText(file);
+  const result = text === null ? { ok: false, error: MESSAGES.importInvalid } : readImportFile(text);
+  if (!result.ok) {
+    showBackupMessages(result.error, null);
+    return;
+  }
+
+  const confirmed = await confirmAction({
+    title: 'Zastąpić dane?',
+    text: 'Wszystkie obecne plany zostaną zastąpione danymi z pliku. Tego nie da się cofnąć.',
+    confirmLabel: 'Zastąp dane',
+  });
+  if (!confirmed) return;
+  if (!saveData(result.value)) {
+    showBackupMessages(MESSAGES.importSaveFailed, null);
+    return;
+  }
+
+  state.data = result.value;
+  state.savedData = structuredClone(result.value);
+  // Wybrany miesiąc mógł w nowych danych stracić sens (np. zamknięty miesiąc bez planu
+  // starszy niż wszystkie wczytane), więc zaczynamy od bieżącego, jak po otwarciu aplikacji.
+  state.monthKey = monthKeyFromDate(new Date());
+  resetMonthMessages();
+  renderAll();
+  showBackupMessages(null, MESSAGES.importDone);
+}
+
+function renderMoreView(today) {
+  const allowed = canDeletePlan(state.monthKey, state.data.months, today);
+  const button = document.querySelector('#delete-plan-button');
+  button.textContent = `Usuń plan: ${monthName(state.monthKey)}`;
+  button.disabled = !allowed;
+  document.querySelector('#delete-plan-hint').hidden = allowed;
+}
+
+async function handleDeletePlan() {
+  showMessage('#delete-plan-error', null);
+  const key = state.monthKey;
+  const confirmed = await confirmAction({
+    title: `Usunąć plan: ${monthName(key)}?`,
+    text: 'Przychody, procenty i wydatki z tego miesiąca zostaną usunięte. Tego nie da się cofnąć.',
+    confirmLabel: 'Usuń plan',
+  });
+  // Gdy okno było otwarte, mogła minąć północ i miesiąc mógł się zamknąć.
+  if (!confirmed || !canDeletePlan(key, state.data.months, new Date())) {
+    renderAll();
+    return;
+  }
+
+  delete state.data.months[key];
+  const saved = saveOrRevert();
+  resetMonthMessages();
+  renderAll();
+  if (!saved) {
+    showMessage('#delete-plan-error', MESSAGES.saveFailed);
+    return;
+  }
+  // Przycisk stał się nieaktywny i stracił fokus; przenosimy go na tytuł ekranu.
+  document.querySelector('#view-more-title').focus();
+}
+
+function setUpMoreView() {
+  document.querySelector('#export-button').addEventListener('click', handleExport);
+  document.querySelector('#import-button').addEventListener('click', handleImportClick);
+  document.querySelector('#import-file').addEventListener('change', handleImportFile);
+  document.querySelector('#delete-plan-button').addEventListener('click', handleDeletePlan);
+}
+
 // Status miesiąca liczymy przy każdym odświeżeniu, a nie raz przy starcie:
 // aplikacja otwarta przez noc ma sama zamknąć miesiąc 1. dnia kolejnego (SPEC §3.2).
 function renderAll() {
@@ -578,6 +743,7 @@ function renderAll() {
   renderPlanView(readOnly);
   for (const card of noPlanCards) card.render(readOnly);
   for (const itemList of itemLists) itemList.render(readOnly);
+  renderMoreView(today);
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -598,6 +764,8 @@ function scheduleMonthStart() {
 setUpTabs();
 setUpMonthArrows();
 setUpSliders();
+setUpConfirmDialog();
+setUpMoreView();
 // Telefon może trzymać aplikację w tle wiele dni; po powrocie odświeżamy status miesięcy.
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) renderAll();

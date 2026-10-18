@@ -1,7 +1,7 @@
 // Zapis i odczyt danych w localStorage oraz eksport i import pliku.
 // Sprawdzanie poprawności danych jest w budget.js; ten moduł tylko z niego korzysta.
 
-import { DATA_VERSION, MESSAGES, validateData, exportFileName } from './budget.js';
+import { DATA_VERSION, parseData, exportFileName } from './budget.js';
 
 const STORAGE_KEY = 'budgetapp-data';
 // Tu trafia uszkodzony zapis, zanim aplikacja go nadpisze, żeby dało się go jeszcze ręcznie odzyskać.
@@ -30,22 +30,12 @@ function writeRaw(key, value) {
   }
 }
 
-// Zwraca sprawdzone dane albo null, gdy tekst nie jest poprawną kopią BudgetApp.
-function parseData(text) {
-  try {
-    const data = JSON.parse(text);
-    return validateData(data) === null ? data : null;
-  } catch {
-    return null;
-  }
-}
-
 export function loadData() {
   const raw = readRaw(STORAGE_KEY);
   if (raw === null) return createEmptyData();
 
-  const data = parseData(raw);
-  if (data) return data;
+  const result = parseData(raw);
+  if (result.ok) return result.value;
 
   writeRaw(CORRUPTED_KEY, raw);
   return createEmptyData();
@@ -64,10 +54,9 @@ export function buildExportFile(data, today) {
   };
 }
 
-// Zapisuje dane z pliku dopiero, gdy są poprawne: błędny plik niczego nie zmienia.
-export function importData(text) {
-  const data = parseData(text);
-  if (!data) return { ok: false, error: MESSAGES.importInvalid };
-  if (!saveData(data)) return { ok: false, saveFailed: true };
-  return { ok: true, value: data };
+// Import ma dwa kroki: najpierw sprawdzamy plik (readImportFile), a dopiero
+// po potwierdzeniu użytkownika zapisujemy go przez saveData. Dzięki temu błędny
+// plik daje komunikat od razu i niczego nie zmienia.
+export function readImportFile(text) {
+  return parseData(text);
 }

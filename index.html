@@ -137,10 +137,30 @@
       </section>
 
       <section class="view" id="view-more" aria-labelledby="view-more-title" hidden>
-        <h2 class="view-title" id="view-more-title">Więcej</h2>
-        <div class="card">
-          <p>Ten ekran pojawi się wkrótce.</p>
+        <h2 class="view-title" id="view-more-title" tabindex="-1">Więcej</h2>
+
+        <div class="card more-card" aria-labelledby="backup-title" role="group">
+          <h3 class="card-title" id="backup-title">Kopia danych</h3>
+          <p class="card-text">Zapisz kopię wszystkich miesięcy w pliku albo wczytaj ją z pliku. Import zastępuje obecne dane.</p>
+          <div class="more-actions">
+            <button type="button" class="button button--primary" id="export-button">Eksportuj dane</button>
+            <button type="button" class="button button--secondary" id="import-button">Importuj dane</button>
+          </div>
+          <!-- Pole wyboru pliku jest ukryte; otwiera je przycisk „Importuj dane”. -->
+          <input type="file" id="import-file" accept=".json,application/json" hidden>
+          <p class="field-error" id="backup-error" role="alert" hidden></p>
+          <p class="status-message" id="backup-status" role="status" hidden></p>
         </div>
+
+        <div class="card more-card" aria-labelledby="delete-plan-title" role="group">
+          <h3 class="card-title" id="delete-plan-title">Usuń plan miesiąca</h3>
+          <button type="button" class="button button--secondary" id="delete-plan-button"
+            aria-describedby="delete-plan-hint"></button>
+          <p class="card-text" id="delete-plan-hint" hidden>Można usunąć tylko istniejący plan bieżącego lub następnego miesiąca.</p>
+          <p class="field-error" id="delete-plan-error" role="alert" hidden></p>
+        </div>
+
+        <p class="storage-info">Dane zapisane tylko na tym urządzeniu</p>
       </section>
     </main>
 
@@ -202,6 +222,19 @@
         <p data-part="closed">Brak planu</p>
       </div>
     </template>
+
+    <!-- Wspólne okno potwierdzenia; app.js wpisuje tytuł, opis i tekst przycisku skutku.
+         Decyzję app.js odczytuje z wartości (value) klikniętego przycisku. -->
+    <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-text">
+      <form method="dialog" class="confirm-form">
+        <h2 class="confirm-title" id="confirm-title"></h2>
+        <p class="confirm-text" id="confirm-text"></p>
+        <div class="confirm-actions">
+          <button type="submit" class="button button--secondary" value="cancel" autofocus>Anuluj</button>
+          <button type="submit" class="button button--primary" value="confirm" id="confirm-button"></button>
+        </div>
+      </form>
+    </dialog>
 
     <nav class="tab-bar" aria-label="Zakładki">
       <button type="button" class="tab" data-view="plan" aria-current="page">
