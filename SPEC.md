@@ -150,8 +150,8 @@ Oba ekrany są zbudowane tak samo:
 
 ### 4.4 Więcej
 - **Eksportuj dane:** pobiera plik z kopią wszystkich danych.
-- **Importuj dane:** wczytuje plik, po potwierdzeniu, że obecne dane zostaną zastąpione. Niepoprawny plik daje komunikat błędu i niczego nie zmienia. Plik jest niepoprawny, jeśli nie jest kopią z BudgetApp albo którykolwiek miesiąc łamie reguły z §3.4. Plany na miesiące późniejsze niż następny są zachowywane i stają się widoczne, gdy nadejdzie ich czas. Gdy plik jest poprawny, ale przeglądarka nie pozwala zapisać danych, pojawia się komunikat „Nie udało się zapisać danych z pliku. Obecne dane nie zostały zmienione.”.
-- **Usuń plan miesiąca:** z potwierdzeniem, tylko dla bieżącego i następnego miesiąca.
+- **Importuj dane:** wczytuje plik, po potwierdzeniu, że obecne dane zostaną zastąpione. Niepoprawny plik daje komunikat błędu i niczego nie zmienia. Plik jest niepoprawny, jeśli nie jest kopią z BudgetApp albo którykolwiek miesiąc łamie reguły z §3.4. Plany na miesiące późniejsze niż następny są zachowywane i stają się widoczne, gdy nadejdzie ich czas. Gdy plik jest poprawny, ale przeglądarka nie pozwala zapisać danych, pojawia się komunikat „Nie udało się zapisać danych z pliku. Obecne dane nie zostały zmienione.”. Po udanym imporcie pojawia się komunikat „Dane zostały wczytane.”.
+- **Usuń plan miesiąca:** z potwierdzeniem, tylko dla bieżącego i następnego miesiąca. Dotyczy miesiąca wybranego w nagłówku; przycisk ma postać „Usuń plan: [miesiąc]”, np. „Usuń plan: Październik 2026”. Gdy wybrany miesiąc jest zamknięty albo nie ma planu, przycisk jest nieaktywny, a pod nim widać napis „Można usunąć tylko istniejący plan bieżącego lub następnego miesiąca.”.
 - Informacja: „Dane zapisane tylko na tym urządzeniu”.
 - Potwierdzenia wyświetlają się w oknie w stylu aplikacji, z przyciskiem opisującym skutek (np. „Zastąp dane”, „Usuń plan”) oraz przyciskiem „Anuluj”.
 

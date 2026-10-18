@@ -20,6 +20,7 @@ import {
   removeItem,
   validatePlan,
   validateData,
+  parseData,
   monthKeyFromDate,
   exportFileName,
   addMonths,
@@ -30,6 +31,7 @@ import {
   findCopySource,
   copyPlan,
   createEmptyPlan,
+  canDeletePlan,
 } from '../js/budget.js';
 
 const NBSP = ' ';
@@ -437,6 +439,49 @@ describe('validateData', () => {
       assert.equal(validateData(makeData({ '2026-10': plan })), MESSAGES.importInvalid);
     }
   });
+
+  it('odrzuca przypadki z definicji ukończenia Z8', () => {
+    const negativeAmount = makePlan({ income: 100000 });
+    negativeAmount.incomes[0].amount = -100;
+    const percentOver100 = makePlan({ income: 100000, savings: 101 });
+    const emptyName = makePlan({ income: 100000 });
+    emptyName.incomes[0].name = '';
+    const missingPercent = makePlan({ income: 100000 });
+    delete missingPercent.savingsPercent;
+    const missingAmount = makePlan({ income: 100000 });
+    delete missingAmount.incomes[0].amount;
+    const missingName = makePlan({ income: 100000 });
+    delete missingName.incomes[0].name;
+    const textAmount = makePlan({ income: 100000 });
+    textAmount.incomes[0].amount = '1000';
+    for (const plan of [negativeAmount, percentOver100, emptyName, missingPercent, missingAmount, missingName, textAmount]) {
+      assert.equal(validateData(makeData({ '2026-10': plan })), MESSAGES.importInvalid, JSON.stringify(plan));
+    }
+  });
+
+  it('odrzuca dane, gdy błędny jest choćby jeden z wielu miesięcy', () => {
+    const valid = makePlan({ income: 100000 });
+    const invalid = makePlan({ income: 100000, expense: 100001 });
+    assert.equal(validateData(makeData({ '2026-09': valid, '2026-10': invalid })), MESSAGES.importInvalid);
+  });
+});
+
+describe('parseData', () => {
+  it('zwraca dane z poprawnego tekstu, także z planem na odległy miesiąc', () => {
+    const data = { version: DATA_VERSION, months: { '2026-10': makePlan({ income: 100000 }), '2030-01': createEmptyPlan() } };
+    assert.deepEqual(parseData(JSON.stringify(data, null, 2)), { ok: true, value: data });
+  });
+
+  it('odrzuca tekst, który nie jest JSON-em, i pusty plik', () => {
+    for (const text of ['', '{', 'nie json', '{"version": 1, "months": {}']) {
+      assert.deepEqual(parseData(text), { ok: false, error: MESSAGES.importInvalid }, text);
+    }
+  });
+
+  it('odrzuca poprawny JSON, który nie jest kopią BudgetApp', () => {
+    assert.deepEqual(parseData('{"version": 2, "months": {}}'), { ok: false, error: MESSAGES.importInvalid });
+    assert.deepEqual(parseData('null'), { ok: false, error: MESSAGES.importInvalid });
+  });
 });
 
 describe('monthKeyFromDate i addMonths', () => {
@@ -581,5 +626,29 @@ describe('copyPlan i createEmptyPlan', () => {
     const first = createEmptyPlan();
     first.incomes.push({ id: 'x', name: 'X', amount: 1 });
     assert.equal(createEmptyPlan().incomes.length, 0);
+  });
+});
+
+describe('canDeletePlan', () => {
+  const months = { '2026-09': createEmptyPlan(), '2026-10': createEmptyPlan(), '2026-11': createEmptyPlan() };
+
+  it('pozwala usunąć plan bieżącego i następnego miesiąca', () => {
+    assert.equal(canDeletePlan('2026-10', months, OCTOBER_31_LATE), true);
+    assert.equal(canDeletePlan('2026-11', months, OCTOBER_31_LATE), true);
+  });
+
+  it('nie pozwala usunąć planu zamkniętego miesiąca', () => {
+    assert.equal(canDeletePlan('2026-09', months, OCTOBER_31_LATE), false);
+    // Po północy 1 listopada październik jest już zamknięty.
+    assert.equal(canDeletePlan('2026-10', months, NOVEMBER_1_EARLY), false);
+  });
+
+  it('nie pozwala usunąć planu, którego nie ma', () => {
+    assert.equal(canDeletePlan('2026-10', {}, OCTOBER_31_LATE), false);
+    assert.equal(canDeletePlan('2026-11', { '2026-10': createEmptyPlan() }, OCTOBER_31_LATE), false);
+  });
+
+  it('działa na przełomie roku', () => {
+    assert.equal(canDeletePlan('2027-01', { '2027-01': createEmptyPlan() }, DECEMBER_15), true);
   });
 });
